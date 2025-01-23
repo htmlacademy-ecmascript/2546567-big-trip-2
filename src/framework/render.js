@@ -48,6 +48,7 @@ function replace(newComponent, oldComponent) {
     throw new Error('Can replace only components');
   }
 
+
   const newElement = newComponent.element;
   const oldElement = oldComponent.element;
 
