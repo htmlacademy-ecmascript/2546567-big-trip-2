@@ -1,8 +1,9 @@
+import { RenderPosition } from './framework/render.js';
 import { BoardPresenter } from './presenter/board-presenter.js';
 import { destinations } from './presenter/model/destinations-model.js';
 import { offersData } from './presenter/model/offer-model.js';
 import { points } from './presenter/model/points-model.js';
-import { RenderPosition } from './render.js';
+
 
 const tripEventsContainer = document.querySelector('.trip-events');
 const ulElement = document.createElement('ul');

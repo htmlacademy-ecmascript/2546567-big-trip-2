@@ -2,13 +2,7 @@ const offersData = [
   // Получение списка дополнительных предложений
   {
     type: 'taxi',
-    offers: [
-      {
-        id: '1',
-        title: 'Upgrade to a comfort class',
-        price: 200
-      }
-    ]
+    offers: []
   },
 
   {

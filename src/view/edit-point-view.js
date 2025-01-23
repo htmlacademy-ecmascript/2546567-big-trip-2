@@ -1,33 +1,51 @@
 import dayjs from 'dayjs';
-import { createElement } from '../render.js';
-// точка маршрута в виде строки
-function createEditPointTemplate() {
+import AbstractView from '../framework/view/abstract-view';
+
+// Генерация шаблона точки маршрута
+function createEditPointTemplate(point, currentOffers) {
+
+
+  const eventDate = dayjs(point.dateFrom).format('MMM D').toUpperCase();
+  const timeFrom = dayjs(point.dateFrom).format('HH:mm');
+  const timeTo = dayjs(point.dateTo).format('HH:mm');
+
+  const time1 = dayjs(point.dateFrom);
+  const time2 = dayjs(point.dateTo);
+  const diffInMilliseconds = time2.diff(time1);
+  const days = Math.floor(diffInMilliseconds / (24 * 60 * 60 * 1000));
+  const remainingMilliseconds = diffInMilliseconds % (24 * 60 * 60 * 1000);
+  const hours = Math.floor(remainingMilliseconds / (60 * 60 * 1000));
+  const minutes = Math.floor((remainingMilliseconds % (60 * 60 * 1000)) / (60 * 1000));
+  const formattedDifference = `${days.toString().padStart(2, '0')}D ${hours.toString().padStart(2, '0')}H ${minutes.toString().padStart(2, '0')}M`;
+
   return `
     <li class="trip-events__item">
       <div class="event">
-        <time class="event__date" datetime="2019-03-18">MAR 18</time>
+        <time class="event__date" datetime="${dayjs(point.dateFrom).format()}">${eventDate}</time>
         <div class="event__type">
-          <img class="event__type-icon" width="42" height="42" src="img/icons/taxi.png" alt="Event type icon">
+          <img class="event__type-icon" width="42" height="42" src="img/icons/${point.type.toLowerCase()}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">Taxi Amsterdam</h3>
+        <h3 class="event__title">${point.type} ${point.destination.name || ''}</h3>
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="2019-03-18T10:30">10:30</time>
+            <time class="event__start-time" datetime="${dayjs(point.dateFrom).format()}">${timeFrom}</time>
             &mdash;
-            <time class="event__end-time" datetime="2019-03-18T11:00">11:00</time>
+            <time class="event__end-time" datetime="${dayjs(point.dateTo).format()}">${timeTo}</time>
           </p>
-          <p class="event__duration">30M</p>
+          <p class="event__duration">${formattedDifference}</p>
         </div>
         <p class="event__price">
-          &euro;&nbsp;<span class="event__price-value">20</span>
+          &euro;&nbsp;<span class="event__price-value">${point.basePrice}</span>
         </p>
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          <li class="event__offer">
-            <span class="event__offer-title">Order Uber</span>
-            &plus;&euro;&nbsp;
-            <span class="event__offer-price">20</span>
-          </li>
+          ${currentOffers.offers.map((item) => `
+            <li class="event__offer">
+              <span class="event__offer-title">${item.title}</span>
+              &plus;&euro;&nbsp;
+              <span class="event__offer-price">${item.price}</span>
+            </li>
+          `).join('')}
         </ul>
         <button class="event__favorite-btn event__favorite-btn--active" type="button">
           <span class="visually-hidden">Add to favorite</span>
@@ -43,81 +61,29 @@ function createEditPointTemplate() {
   `;
 }
 
+export default class EditPointView extends AbstractView {
+  // #element = null;
+  #point = null;
+  #offers = null;
+  #handleEditClick = null;
 
-class EditPointView {
-  element = null;
+  constructor(point, currentOffers, onEditClick) {
+    super();
+    // this.#element = createEditPointTemplate(point, currentOffers);
+    this.#point = point;
+    this.#offers = currentOffers;
+    this.#handleEditClick = onEditClick;
 
-  constructor(point, currentOffers) {
-    this.element = createElement(createEditPointTemplate());
-    const imgPoint = this.element.querySelector('.event__type-icon');
-    imgPoint.src = `img/icons/${point.type.toLowerCase()}.png`;
-
-    // 'MAR 18'
-    const eventDate = this.element.querySelector('.event__date');
-    const dateFrom = dayjs(point.dateFrom).format('MMM D').toUpperCase();
-    eventDate.textContent = `${dateFrom}`;
-
-    //'01:45 - 02:45'
-    const startTime = this.element.querySelector('.event__start-time');
-    const startEnd = this.element.querySelector('.event__end-time');
-    const timeFrom = dayjs(point.dateFrom).format('HH:mm');
-    const timeTo = dayjs(point.dateTo).format('HH:mm');
-    startTime.textContent = timeFrom;
-    startEnd.textContent = timeTo;
-
-    // разница во времени '02D 01H 35M'
-    const time1 = dayjs(point.dateFrom);
-    const time2 = dayjs(point.dateTo);
-
-    // Вычисляем разницу в миллисекундах
-    const diffInMilliseconds = time2.diff(time1);
-
-    // Вычисляем количество дней
-    const days = Math.floor(diffInMilliseconds / (24 * 60 * 60 * 1000));
-
-    // Вычисляем разницу в оставшихся миллисекундах
-    const remainingMilliseconds = diffInMilliseconds % (24 * 60 * 60 * 1000);
-
-    // Вычисляем количество часов и минут
-    const hours = Math.floor(remainingMilliseconds / (60 * 60 * 1000));
-    const minutes = Math.floor((remainingMilliseconds % (60 * 60 * 1000)) / (60 * 1000));
-
-    // Форматируем результат
-    const formattedDifference = `${days.toString().padStart(2, '0')}D ${hours.toString().padStart(2, '0')}H ${minutes.toString().padStart(2, '0')}M`;
-    const eventDuration = this.element.querySelector('.event__duration');
-    eventDuration.textContent = formattedDifference;
-
-    //цена
-    const pElement = this.element.querySelector('.event__price');
-    pElement.textContent = `€ ${point.basePrice}`;
-
-    //офферы
-    const offersContainer = this.element.querySelector('.event__selected-offers');
-    offersContainer.innerHTML = '';
-    currentOffers.offers.map((item) => {
-      const liElement = document.createElement('li');
-      liElement.classList.add('event__offer');
-      const spanElement1 = document.createElement('span');
-      spanElement1.classList.add('event__offer-title');
-      spanElement1.textContent = item.title;
-      const spanElement2 = document.createElement('span');
-      spanElement2.classList.add('event__offer-price');
-      spanElement2.textContent = `+€ ${item.price}`;
-
-      liElement.appendChild(spanElement1);
-      liElement.appendChild(spanElement2);
-      offersContainer.appendChild(liElement);
-
-    });
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#editClickHandler);
   }
 
-  getElement() {
-    return this.element;
+  get template() {
+    return createEditPointTemplate(this.#point, this.#offers);
   }
 
-  removeElement() {
-    this.element = null;
-  }
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditClick();
+  };
 }
-
-export { EditPointView };
