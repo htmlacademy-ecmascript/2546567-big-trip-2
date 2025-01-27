@@ -87,7 +87,6 @@ function createEditFormTemplate(destinations, offersData) {
 }
 
 export default class EditFormView extends AbstractView {
-  // #form = null;
   #destinations = null;
   #offersData = null;
   #handleEditClick = null;

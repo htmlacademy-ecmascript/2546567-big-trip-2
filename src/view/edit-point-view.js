@@ -62,14 +62,12 @@ function createEditPointTemplate(point, currentOffers) {
 }
 
 export default class EditPointView extends AbstractView {
-  // #element = null;
   #point = null;
   #offers = null;
   #handleEditClick = null;
 
   constructor(point, currentOffers, onEditClick) {
     super();
-    // this.#element = createEditPointTemplate(point, currentOffers);
     this.#point = point;
     this.#offers = currentOffers;
     this.#handleEditClick = onEditClick;
