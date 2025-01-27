@@ -3,6 +3,8 @@ import EditFormView from '../view/edit-form-view.js';
 import EditPointView from '../view/edit-point-view.js';
 import FilterView from '../view/filter-view.js';
 import SortView from '../view/sort-view.js';
+import NoPointView from '../view/no-point.view.js';
+import { generateFilterMocks } from '../utils/filter.js';
 
 class BoardPresenter {
   //фильтры
@@ -15,11 +17,9 @@ class BoardPresenter {
 
   // форма редактирования
   editFormContainer = null;
-  // editFormComponent = null;
 
   // точки маршрута
   editPointComponentContainer = null;
-  // editPoints = [];
 
   points = [];
   offersData = [];
@@ -38,7 +38,9 @@ class BoardPresenter {
     this.editFormComponentContainer = document.querySelector('.trip-events__item');
     this.editPointComponentContainer = document.querySelector('.trip-events__list');
 
-    this.filterComponent = new FilterView();
+    const filters = generateFilterMocks(points) ;
+
+    this.filterComponent = new FilterView(filters);
     this.sortComponent = new SortView();
 
   }
@@ -46,6 +48,11 @@ class BoardPresenter {
   init() {
     render(this.filterComponent, this.filterComponentContainer);
     render(this.sortComponent, this.tripEventsContainer, RenderPosition.AFTERBEGIN);
+
+    if (this.points.length <= 0) {
+      const noPointViewElement = new NoPointView();
+      render(noPointViewElement, this.editPointComponentContainer);
+    }
 
     for (let i = 0; i < this.points.length; i++) {
       this.#renderPoint(this.points[i]);
@@ -55,8 +62,6 @@ class BoardPresenter {
   #renderPoint(point) {
 
     const currentOffers = this.offersData.find((item) => item.type === point.type);
-
-
     const pointEditComponent = new EditPointView(point, currentOffers, () => {
       replacePointToForm();
     });
@@ -84,8 +89,9 @@ class BoardPresenter {
         document.removeEventListener('keydown', escKeyDownHandler);
       }
     }
+
     render(pointEditComponent, this.editPointComponentContainer);
+
   }
 }
-
 export { BoardPresenter };
