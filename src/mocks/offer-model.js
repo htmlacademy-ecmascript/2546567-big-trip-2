@@ -2,14 +2,20 @@ const offersData = [
   // Получение списка дополнительных предложений
   {
     type: 'taxi',
-    offers: []
+    offers: [
+      {
+        id: 'b4c3e4e6-9053-42ce-b747-e281314baa31',
+        title: 'Upgrade to a economy class',
+        price: 70
+      }
+    ]
   },
 
   {
     type: 'Bus',
     offers: [
       {
-        id: '2',
+        id: 'b4c3e4e6-9053-42ce-b747-e281314baa34',
         title: 'Upgrade to a business class',
         price: 120
       }
@@ -40,7 +46,7 @@ const offersData = [
     type: 'Train',
     offers: [
       {
-        id: '4',
+        id: 'b4c3e4e6-9053-42ce-b747-e281314baa33',
         title: 'Upgrade to a vip class',
         price: 20
       }
@@ -50,7 +56,7 @@ const offersData = [
     type: 'Flight',
     offers: [
       {
-        id: '5',
+        id: 'b4c3e4e6-9053-42ce-b747-e281314baa31',
         title: 'Upgrade to a economy class',
         price: 70
       }
