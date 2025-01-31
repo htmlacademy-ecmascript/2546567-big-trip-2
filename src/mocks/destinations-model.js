@@ -1,10 +1,27 @@
-const destinations = [
+const destinationsData = [
   // массив пунктов назначений
   {
     id: '1',
     description: 'Moscow never sleeps.',
-    name: 'Moscow',
-    pictures: []
+    name: 'Geneva',
+    pictures: [
+      {
+        src: 'img/photos/3.jpg',
+        description: 'a canal with two boats near the shore'
+      },
+      {
+        src: 'img/photos/1.jpg',
+        description: 'azure sea with sandy beach'
+      },
+      {
+        src: 'img/photos/2.jpg',
+        description: 'table in cafe on the table menu'
+      },
+      {
+        src: 'img/photos/4.jpg',
+        description: 'field with rye'
+      },
+    ]
   },
   {
     id: '2',
@@ -38,8 +55,16 @@ const destinations = [
       {
         src: 'img/photos/4.jpg',
         description: 'field with rye'
+      },
+      {
+        src: 'img/photos/4.jpg',
+        description: 'field with rye'
+      },
+      {
+        src: 'img/photos/4.jpg',
+        description: 'field with rye'
       }
     ]
   }
 ];
-export { destinations };
+export { destinationsData };
