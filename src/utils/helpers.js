@@ -10,6 +10,7 @@ const filter = {
   [FilterType.FUTURE] : (points) => points.filter((point) => point.dateFrom > now && point.dateTo > now),
 };
 
+
 const DATE_FORMAT = 'D MMMM';
 
 function humanizePointDueDate(dueDate) {
@@ -34,20 +35,34 @@ function getWeightForNullDate(dateA, dateB) {
   return null;
 }
 
-function sortPointUp(pointA, pointB) {
-  const weight = getWeightForNullDate(pointA.dueDate, pointB.dueDate);
-
-  return weight ?? dayjs(pointA.dueDate).diff(dayjs(pointB.dueDate));
+function sortPointByDayUp(pointA, pointB) {
+  const weight = getWeightForNullDate(pointA.dateFrom, pointB.dateFrom);
+  return weight ?? dayjs(pointA.dateFrom).diff(dayjs(pointB.dateFrom));
 }
 
-function sortPointDown(pointA, pointB) {
-  const weight = getWeightForNullDate(pointA.dueDate, pointB.dueDate);
-
-  return weight ?? dayjs(pointB.dueDate).diff(dayjs(pointA.dueDate));
+function sortPointByPriceUp(pointA, pointB) {
+  return pointA.basePrice - pointB.basePrice;
 }
 
-function isDatesEqual(dateA, dateB) {
-  return (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
+function sortPointByEventUp(pointA, pointB) {
+  if (pointA.destination.name.toLowerCase() < pointB.destination.name.toLowerCase()) {
+    return -1;
+  }
+  if (pointA.destination.name.toLowerCase() > pointB.destination.name.toLowerCase()) {
+    return 1;
+  }
+  return 0;
 }
 
-export {filter, humanizePointDueDate, sortPointUp, sortPointDown, isDatesEqual};
+function sortPointByTimeDiffUp(pointA, pointB) {
+  const durationA = dayjs(pointA.dateTo).diff(dayjs(pointA.dateFrom));
+  const durationB = dayjs(pointB.dateTo).diff(dayjs(pointB.dateFrom));
+  return durationA - durationB;
+}
+
+function sortPointByOffersUp(pointA, pointB) {
+  return pointA.offers.length - pointB.offers.length;
+}
+
+
+export {filter, humanizePointDueDate, sortPointByDayUp, sortPointByPriceUp, sortPointByEventUp, sortPointByTimeDiffUp, sortPointByOffersUp};

@@ -1,7 +1,7 @@
 import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
 import { remove, render, RenderPosition } from '../framework/render.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
-import { filter, sortPointDown, sortPointUp } from '../utils/helpers.js';
+import { filter, sortPointByDayUp, sortPointByEventUp, sortPointByOffersUp, sortPointByPriceUp, sortPointByTimeDiffUp } from '../utils/helpers.js';
 import BoardView from '../view/board-view.js';
 import LoadingView from '../view/loading-view.js';
 import NoPointView from '../view/no-point.view.js';
@@ -61,9 +61,15 @@ class BoardPresenter {
 
     switch (this.#currentSortType) {
       case SortType.DAY:
-        return filteredPoints.sort(sortPointUp);
+        return filteredPoints.sort(sortPointByDayUp);
       case SortType.EVENT:
-        return filteredPoints.sort(sortPointDown);
+        return filteredPoints.sort(sortPointByEventUp);
+      case SortType.TIME:
+        return filteredPoints.sort(sortPointByTimeDiffUp);
+      case SortType.PRICE:
+        return filteredPoints.sort(sortPointByPriceUp);
+      case SortType.OFFER:
+        return filteredPoints.sort(sortPointByOffersUp);
     }
 
     return filteredPoints;

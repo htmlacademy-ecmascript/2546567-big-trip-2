@@ -19,6 +19,7 @@ export default class FilterPresenter {
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
+  //TODO тут нужно настроить фильтры !!!
   get filters() {
     const points = this.#pointsModel.points;
     return Object.values(FilterType).map((type) => ({
