@@ -2,9 +2,9 @@ const points = [
   // Получение списка точек маршрута
   {
     id: '1',
-    'base_price': 1100,
-    dateFrom: '2019-05-10T22:55:56.845Z',
-    dateTo: '2019-05-12T11:22:13.375Z',
+    'base_price': 3300,
+    dateFrom: '2019-05-12T22:55:56.845Z',
+    dateTo: '2019-05-14T11:22:13.375Z',
     destination: {
       name: 'Geneva'
     },
@@ -19,8 +19,8 @@ const points = [
   {
     id: '2',
     'base_price': 1600,
-    dateFrom: '2024-12-10T10:55:56.845Z',
-    dateTo: '2024-12-16T12:22:15.375Z',
+    dateFrom: '2019-05-21T22:55:56.845Z',
+    dateTo: '2019-05-25T11:22:13.375Z',
     destination: {
       name: 'Amsterdam'
     },
@@ -35,8 +35,8 @@ const points = [
   {
     id: '3',
     'base_price': 2100,
-    dateFrom: '2025-01-10T16:05:56.845Z',
-    dateTo: '2025-02-11T19:44:13.375Z',
+    dateFrom: '2019-05-05T22:55:56.845Z',
+    dateTo: '2019-05-08T11:22:13.375Z',
     destination: {
       name: 'Chamonix'
     },
