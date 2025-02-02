@@ -1,8 +1,8 @@
 const destinationsData = [
   // массив пунктов назначений
   {
-    id: '1',
-    description: 'Moscow never sleeps.',
+    id: '13',
+    description: 'Geneva never sleeps.',
     name: 'Geneva',
     pictures: [
       {
@@ -24,7 +24,7 @@ const destinationsData = [
     ]
   },
   {
-    id: '2',
+    id: '42',
     description: 'Chamonix, is a beautiful city, a true asian pearl, with crowded streets.',
     name: 'Chamonix',
     pictures: [
@@ -35,7 +35,7 @@ const destinationsData = [
     ]
   },
   {
-    id: '3',
+    id: '777',
     description:
       'Amsterdam is a cozy and clean city',
     name: 'Amsterdam',

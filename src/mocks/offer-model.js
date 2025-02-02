@@ -67,6 +67,51 @@ const offersData = [
       }
     ]
   },
+  {
+    type: 'Check-in',
+    offers: [
+      {
+        id: 'b4c3e4e6-9053-42ce-b747-e281314baa35',
+        title: 'Upgrade to a economy class',
+        price: 174
+      }
+    ]
+  },
+  {
+    type: 'Sightseeing',
+    offers: [
+    ]
+  },
+  {
+    type: 'Restaurant',
+    offers: [
+      {
+        id: 'b4c3e4e6-9053-42ce-b747-e281314baa37',
+        title: 'Upgrade to a economy class',
+        price: 170
+      },
+      {
+        id: 'b4c3e4e6-9053-42ce-b747-e281314baa33',
+        title: 'Upgrade to a vip class',
+        price: 200
+      }
+    ]
+  },
+  {
+    type: 'Drive',
+    offers: [
+      {
+        id: 'b4c3e4e6-9053-42ce-b747-e281314baa37',
+        title: 'Upgrade to a economy class',
+        price: 170
+      },
+      {
+        id: 'b4c3e4e6-9053-42ce-b747-e281314baa33',
+        title: 'Upgrade to a vip class',
+        price: 200
+      }
+    ]
+  },
 ];
 
 export { offersData };
