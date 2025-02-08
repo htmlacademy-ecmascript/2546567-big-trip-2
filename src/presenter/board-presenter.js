@@ -51,6 +51,12 @@ class BoardPresenter {
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
+
+
+    document.querySelector('.trip-main__event-add-btn').addEventListener('click', () => {
+      console.log('!!!!!!!!!!!!!!!!');
+
+    });
   }
 
   get points() {
@@ -127,12 +133,19 @@ class BoardPresenter {
         }
         break;
       case UserAction.DELETE_POINT:
-        this.#pointPresenters.get(update.id).setDeleting();
-        try {
-          await this.#pointsModel.deletePoint(updateType, update);
-        } catch(err) {
-          this.#pointPresenters.get(update.id).setAborting();
-        }
+        this.#pointsModel.points = this.#pointsModel.points.filter((item) => item.id !== update.id);
+
+        //Код для api, когда оно заработает
+        // this.#pointPresenters.get(update.id).setDeleting();
+        // try {
+        //   await this.#pointsModel.deletePoint(updateType, update);
+        // } catch(err) {
+        //   this.#pointPresenters.get(update.id).setAborting();
+        // }
+        break;
+      case UserAction.CREATE_POINT:
+        console.log('CREATE_POINT');
+
         break;
     }
 

@@ -16,6 +16,11 @@ export default class PointsModel extends Observable {
     return this.#points;
   }
 
+  set points(points) {
+    this.#points = points;
+    this._notify(UpdateType.MAJOR, this.#points);
+  }
+
   async init() {
     try {
       const points = await this.#pointsApiService.points;
