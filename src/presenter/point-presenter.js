@@ -4,7 +4,7 @@ import {UserAction, UpdateType} from '../const.js';
 import PointEditView from '../view/point-edit-view.js';
 import PointView from '../view/point-view.js';
 
-const Mode = {
+export const Mode = {
   DEFAULT: 'DEFAULT',
   EDITING: 'EDITING',
 };
@@ -36,13 +36,13 @@ export default class PointPresenter {
       point: this.#point,
       onEditClick: this.#handleEditClick,
       onFavoriteClick: this.#handleFavoriteClick,
-      onArchiveClick: this.#handleArchiveClick
     });
 
     this.#pointEditComponent = new PointEditView({
       point: this.#point,
       onFormSubmit: this.#handleFormSubmit,
-      onDeleteClick: this.#handleDeleteClick
+      onDeleteClick: this.#handleDeleteClick,
+      onFormClose: this.#handleCloseFormClick
     });
 
     if (prevPointComponent === null || prevPointEditComponent === null) {
@@ -129,6 +129,13 @@ export default class PointPresenter {
       this.#pointEditComponent.reset(this.#point);
       this.#replaceFormToCard();
     }
+  };
+
+  #handleCloseFormClick = (evt) => {
+    evt.preventDefault();
+    this.#pointEditComponent.reset(this.#point);
+    this.#replaceFormToCard();
+
   };
 
   #handleEditClick = () => {

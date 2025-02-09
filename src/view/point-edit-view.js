@@ -5,15 +5,27 @@ import { offersData } from '../mocks/offer-model.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
+const EVENT_TYPES = [
+  'taxi',
+  'bus',
+  'train',
+  'ship',
+  'drive',
+  'flight',
+  'check-in',
+  'sightseeing',
+  'restaurant',
+];
+
 const BLANK_POINT = {
-  id: '2',
-  'base_price': 1600,
+  basePrice: 1600,
   dateFrom: '2024-12-10T10:55:56.845Z',
   dateTo: '2024-12-16T12:22:15.375Z',
   destination: {
     name: 'Amsterdam',
+    pictures:[]
   },
-  'is_favorite': false,
+  isFavorite: false,
   offers: [
     {
       id: 'b4c3e4e6-9053-42ce-b747-e281314baa31',
@@ -35,6 +47,8 @@ const BLANK_POINT = {
 };
 
 function createEditPointTemplate(point) {
+  const idEditing = !!point.id;
+
   return `
   <li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -48,19 +62,8 @@ function createEditPointTemplate(point) {
           <div class="event__type-list">
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Event type</legend>
-              ${[
-    'taxi',
-    'bus',
-    'train',
-    'ship',
-    'drive',
-    'flight',
-    'check-in',
-    'sightseeing',
-    'restaurant',
-  ]
-    .map(
-      (type) => `
+              ${EVENT_TYPES.map(
+    (type) => `
                 <div class="event__type-item">
                   <input id="event-type-${type}-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="${type}">
                   <label class="event__type-label event__type-label--${type}" for="event-type-${type}-1">${
@@ -68,7 +71,7 @@ function createEditPointTemplate(point) {
 }</label>
                 </div>
               `
-    )
+  )
     .join('')}
             </fieldset>
           </div>
@@ -100,11 +103,14 @@ function createEditPointTemplate(point) {
 
         <div class="event__field-group event__field-group--price">
           <label class="event__label" for="event-price-1"><span class="visually-hidden">Price</span>&euro;</label>
-          <input class="event__input event__input--price" id="event-price-1" type="text" name="event-price" value="">
+          <input class="event__input event__input--price" id="event-price-1" type="number" name="event-price" value="${point.basePrice}">
         </div>
 
         <button class="event__save-btn btn btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Cancel</button>
+        <button class="event__reset-btn" type="reset">${idEditing ? 'Delete' : 'Cancel'}</button>
+        ${idEditing ? `<button class="event__rollup-btn" type="button">
+          <span class="visually-hidden">Open event</span>
+        </button>` : ''}
       </header>
 
       <section class="event__details">
@@ -155,12 +161,14 @@ export default class PointEditView extends AbstractStatefulView {
   #handleDeleteClick = null;
   #datepickerFrom = null;
   #datepickerTo = null;
+  #handleFormClose = null;
 
-  constructor({ point = BLANK_POINT, onFormSubmit, onDeleteClick }) {
+  constructor({ point = BLANK_POINT, onFormSubmit, onDeleteClick, onFormClose }) {
     super();
     this._setState(PointEditView.parsePointToState(point));
     this.#handleFormSubmit = onFormSubmit;
     this.#handleDeleteClick = onDeleteClick;
+    this.#handleFormClose = onFormClose;
 
     this._restoreHandlers();
   }
@@ -169,8 +177,7 @@ export default class PointEditView extends AbstractStatefulView {
     return createEditPointTemplate(this._state);
   }
 
-  // Перегружаем метод родителя removeElement,
-  // чтобы при удалении удалялся более не нужный календарь
+
   removeElement() {
     super.removeElement();
 
@@ -198,6 +205,15 @@ export default class PointEditView extends AbstractStatefulView {
     this.element
       .querySelector('.event__input')
       .addEventListener('change', this.#destinationChangeHandler);
+    this.element
+      .querySelector('.event__reset-btn')
+      .addEventListener('click', this.#formDeleteClickHandler);
+    this.element
+      .querySelector('.event__save-btn')
+      .addEventListener('click', this.#formSubmitHandler);
+    this.element
+      .querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#handleFormClose);
 
     this.#setDatepicker();
   }
@@ -226,65 +242,18 @@ export default class PointEditView extends AbstractStatefulView {
     );
     const newPoint = {
       ...this._state,
-      destination: currentDestination,
+      id: this._state.id ?? String(Math.random()),
+      destination: currentDestination ? currentDestination : {name: 'Chaomix', pictures: []},
     };
+
     this.updateElement(newPoint);
   };
   //=====================================================
 
-  #colorChangeHandler = (evt) => {
-    evt.preventDefault();
-    this.updateElement({
-      color: evt.target.value,
-    });
-  };
-
-  #descriptionInputHandler = (evt) => {
-    evt.preventDefault();
-    this._setState({
-      description: evt.target.value,
-    });
-  };
-
-  #dueDateChangeHandler = ([userDate]) => {
-    this.updateElement({
-      dueDate: userDate,
-    });
-  };
-
-  #dueDateToggleHandler = (evt) => {
-    evt.preventDefault();
-    this.updateElement({
-      isDueDate: !this._state.isDueDate,
-      // Логика следующая: если выбор даты нужно показать,
-      // то есть когда "!this._state.isDueDate === true",
-      // тогда isRepeating должно быть строго false.
-      isRepeating: !this._state.isDueDate ? false : this._state.isRepeating,
-    });
-  };
-
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit(PointEditView.parseStateToPoint(this._state));
-  };
-
-  #repeatingToggleHandler = (evt) => {
-    evt.preventDefault();
-    this.updateElement({
-      isRepeating: !this._state.isRepeating,
-      // Аналогично, но наоборот, для повторения
-      isDueDate: !this._state.isRepeating ? false : this._state.isDueDate,
-    });
-  };
-
-  #repeatingChangeHandler = (evt) => {
-    evt.preventDefault();
-    this.updateElement({
-      repeating: {
-        ...this._state.repeating,
-        [evt.target.value]: evt.target.checked,
-      },
-    });
+    const formattedPoint = PointEditView.parseStateToPoint(this._state);
+    this.#handleFormSubmit(formattedPoint);
   };
 
   #formDeleteClickHandler = (evt) => {

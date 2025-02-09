@@ -3,8 +3,8 @@ const points = [
   {
     id: '1',
     'base_price': 3300,
-    dateFrom: '2019-05-12T22:55:56.845Z',
-    dateTo: '2019-05-14T11:22:13.375Z',
+    dateFrom: '2025-05-12T22:55:56.845Z',
+    dateTo: '2025-05-14T11:22:13.375Z',
     destination: {
       name: 'Geneva'
     },

@@ -79,6 +79,12 @@ class BoardPresenter {
     this.#renderBoard();
   }
 
+  createPoint() {
+    this.#currentSortType = SortType.DEFAULT;
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#newPointPresenter.init();
+  }
+
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
@@ -127,12 +133,15 @@ class BoardPresenter {
         }
         break;
       case UserAction.DELETE_POINT:
-        this.#pointPresenters.get(update.id).setDeleting();
-        try {
-          await this.#pointsModel.deletePoint(updateType, update);
-        } catch(err) {
-          this.#pointPresenters.get(update.id).setAborting();
-        }
+        this.#pointsModel.points = this.#pointsModel.points.filter((item) => item.id !== update.id);
+
+        //Код для api, когда оно заработает
+        // this.#pointPresenters.get(update.id).setDeleting();
+        // try {
+        //   await this.#pointsModel.deletePoint(updateType, update);
+        // } catch(err) {
+        //   this.#pointPresenters.get(update.id).setAborting();
+        // }
         break;
     }
 

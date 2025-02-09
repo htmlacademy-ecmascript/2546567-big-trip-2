@@ -16,6 +16,11 @@ export default class PointsModel extends Observable {
     return this.#points;
   }
 
+  set points(points) {
+    this.#points = points;
+    this._notify(UpdateType.MAJOR, this.#points);
+  }
+
   async init() {
     try {
       const points = await this.#pointsApiService.points;
@@ -53,8 +58,10 @@ export default class PointsModel extends Observable {
 
   async addPoint(updateType, update) {
     try {
-      const response = await this.#pointsApiService.addPoint(update);
+      // const response = await this.#pointsApiService.addPoint(update);
+      const response = {...update};
       const newPoint = this.#adaptToClient(response);
+
       this.#points = [newPoint, ...this.#points];
       this._notify(updateType, newPoint);
     } catch(err) {
@@ -70,9 +77,7 @@ export default class PointsModel extends Observable {
     }
 
     try {
-      // Обратите внимание, метод удаления задачи на сервере
-      // ничего не возвращает. Это и верно,
-      // ведь что можно вернуть при удалении задачи?
+      //  метод удаления задачи на сервере
       await this.#pointsApiService.deletePoint(update);
       this.#points = [
         ...this.#points.slice(0, index),
@@ -93,17 +98,16 @@ export default class PointsModel extends Observable {
       destination: currentDestination,
       isFavorite: point['is_favorite'],
       basePrice: point['base_price'],
-
+      dateFrom: point['date_from'],
+      dateTo: point['date_to'],
       // dueDate: point['due_date'] !== null ? new Date(point['due_date']) : point['due_date'], // На клиенте дата хранится как экземпляр Date
-      // isArchive: point['is_archived'],
-      // isFavorite: point['is_favorite'],
-      // repeating: point['repeating_days'],
     };
 
     // Ненужные ключи мы удаляем
     delete adaptedPoint['is_favorite'];
     delete adaptedPoint['base_price'];
-
+    delete adaptedPoint['date_from'];
+    delete adaptedPoint['date_to'];
     return {...adaptedPoint};
   }
 }

@@ -1,15 +1,12 @@
 import dayjs from 'dayjs';
 import { FilterType } from '../const';
 
-const now = dayjs();
-
 const filter = {
   [FilterType.EVERYTHING] : (points) => points.filter((point) => point),
-  [FilterType.PRESENT] : (points) => points.filter((point) => point.dateFrom < now && point.dateTo > now),
-  [FilterType.PAST] : (points) => points.filter((point) => point.dateFrom < now && point.dateTo < now),
-  [FilterType.FUTURE] : (points) => points.filter((point) => point.dateFrom > now && point.dateTo > now),
+  [FilterType.PRESENT] : (points) => points.filter((point) => dayjs(point.dateFrom).isBefore(dayjs(), 'day') && dayjs(point.dateTo).isAfter(dayjs(), 'day')),
+  [FilterType.PAST] : (points) => points.filter((point) => dayjs(point.dateTo).isBefore(dayjs(), 'day')),
+  [FilterType.FUTURE] : (points) => points.filter((point) => dayjs(point.dateFrom).isAfter(dayjs(), 'day')),
 };
-
 
 const DATE_FORMAT = 'D MMMM';
 
