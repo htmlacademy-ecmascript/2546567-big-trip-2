@@ -51,12 +51,6 @@ class BoardPresenter {
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
-
-
-    document.querySelector('.trip-main__event-add-btn').addEventListener('click', () => {
-      console.log('!!!!!!!!!!!!!!!!');
-
-    });
   }
 
   get points() {
@@ -83,6 +77,12 @@ class BoardPresenter {
 
   init() {
     this.#renderBoard();
+  }
+
+  createPoint() {
+    this.#currentSortType = SortType.DEFAULT;
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#newPointPresenter.init();
   }
 
   #handleModelEvent = (updateType, data) => {
@@ -142,10 +142,6 @@ class BoardPresenter {
         // } catch(err) {
         //   this.#pointPresenters.get(update.id).setAborting();
         // }
-        break;
-      case UserAction.CREATE_POINT:
-        console.log('CREATE_POINT');
-
         break;
     }
 

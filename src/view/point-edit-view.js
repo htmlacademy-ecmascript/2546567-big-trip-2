@@ -4,7 +4,6 @@ import { destinationsData } from '../mocks/destinations-model.js';
 import { offersData } from '../mocks/offer-model.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
-import { Mode } from '../presenter/point-presenter.js';
 
 const EVENT_TYPES = [
   'taxi',
@@ -19,14 +18,14 @@ const EVENT_TYPES = [
 ];
 
 const BLANK_POINT = {
-  id: '99999999999999999999999',
-  'base_price': 1600,
+  basePrice: 1600,
   dateFrom: '2024-12-10T10:55:56.845Z',
   dateTo: '2024-12-16T12:22:15.375Z',
   destination: {
     name: 'Amsterdam',
+    pictures:[]
   },
-  'is_favorite': false,
+  isFavorite: false,
   offers: [
     {
       id: 'b4c3e4e6-9053-42ce-b747-e281314baa31',
@@ -47,7 +46,8 @@ const BLANK_POINT = {
   type: 'Bus',
 };
 
-function createEditPointTemplate(point, mode) {
+function createEditPointTemplate(point) {
+  const idEditing = !!point.id;
 
   return `
   <li class="trip-events__item">
@@ -103,14 +103,14 @@ function createEditPointTemplate(point, mode) {
 
         <div class="event__field-group event__field-group--price">
           <label class="event__label" for="event-price-1"><span class="visually-hidden">Price</span>&euro;</label>
-          <input class="event__input event__input--price" id="event-price-1" type="text" name="event-price" value="${point.basePrice}">
+          <input class="event__input event__input--price" id="event-price-1" type="number" name="event-price" value="${point.basePrice}">
         </div>
 
         <button class="event__save-btn btn btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">${mode === Mode.DEFAULT ? 'Cancel' : 'Delete'}</button>
-        <button class="event__rollup-btn" type="button">
+        <button class="event__reset-btn" type="reset">${idEditing ? 'Delete' : 'Cancel'}</button>
+        ${idEditing ? `<button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
-        </button>
+        </button>` : ''}
       </header>
 
       <section class="event__details">
@@ -161,7 +161,6 @@ export default class PointEditView extends AbstractStatefulView {
   #handleDeleteClick = null;
   #datepickerFrom = null;
   #datepickerTo = null;
-  #mode = null;
 
   constructor({ point = BLANK_POINT, onFormSubmit, onDeleteClick }) {
     super();
@@ -169,17 +168,11 @@ export default class PointEditView extends AbstractStatefulView {
     this.#handleFormSubmit = onFormSubmit;
     this.#handleDeleteClick = onDeleteClick;
 
-    if(point.id === '99999999999999999999999') {
-      this.mode = Mode.DEFAULT;
-    } else {
-      this.mode = Mode.EDITING;
-    }
-
     this._restoreHandlers();
   }
 
   get template() {
-    return createEditPointTemplate(this._state, this.#mode);
+    return createEditPointTemplate(this._state);
   }
 
   // Перегружаем метод родителя removeElement,
@@ -214,6 +207,9 @@ export default class PointEditView extends AbstractStatefulView {
     this.element
       .querySelector('.event__reset-btn')
       .addEventListener('click', this.#formDeleteClickHandler);
+    this.element
+      .querySelector('.event__save-btn')
+      .addEventListener('click', this.#formSubmitHandler);
 
     this.#setDatepicker();
   }
@@ -242,15 +238,18 @@ export default class PointEditView extends AbstractStatefulView {
     );
     const newPoint = {
       ...this._state,
-      destination: currentDestination,
+      id: this._state.id ?? String(Math.random()),
+      destination: currentDestination ? currentDestination : {name: 'Chaomix', pictures: []},
     };
+
     this.updateElement(newPoint);
   };
   //=====================================================
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit(PointEditView.parseStateToPoint(this._state));
+    const formattedPoint = PointEditView.parseStateToPoint(this._state);
+    this.#handleFormSubmit(formattedPoint);
   };
 
   #formDeleteClickHandler = (evt) => {
