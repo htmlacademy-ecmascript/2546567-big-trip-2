@@ -1,5 +1,5 @@
 import ApiService from './framework/api-service.js';
-import { points } from './mocks/points-model.js'; // Импортируем замоканные данные
+import { points } from './mocks/points-model.js';
 
 const Method = {
   GET: 'GET',
@@ -76,14 +76,11 @@ export default class PointsApiService extends ApiService {
       // 'due_date': point.dueDate instanceof Date ? point.dueDate.toISOString() : null,
       // 'is_archived': point.isArchive,
       'is_favorite': point.isFavorite,
-      // 'repeating_days': point.repeating,
+      'base_price':point.basePrice,
     };
 
-    // delete adaptedPoint.dueDate;
-    // delete adaptedPoint.isArchive;
     delete adaptedPoint.isFavorite;
-    // delete adaptedPoint.repeating;
-
+    delete adaptedPoint.basePrice;
     return adaptedPoint;
   }
 }

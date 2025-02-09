@@ -161,12 +161,14 @@ export default class PointEditView extends AbstractStatefulView {
   #handleDeleteClick = null;
   #datepickerFrom = null;
   #datepickerTo = null;
+  #handleFormClose = null;
 
-  constructor({ point = BLANK_POINT, onFormSubmit, onDeleteClick }) {
+  constructor({ point = BLANK_POINT, onFormSubmit, onDeleteClick, onFormClose }) {
     super();
     this._setState(PointEditView.parsePointToState(point));
     this.#handleFormSubmit = onFormSubmit;
     this.#handleDeleteClick = onDeleteClick;
+    this.#handleFormClose = onFormClose;
 
     this._restoreHandlers();
   }
@@ -175,8 +177,7 @@ export default class PointEditView extends AbstractStatefulView {
     return createEditPointTemplate(this._state);
   }
 
-  // Перегружаем метод родителя removeElement,
-  // чтобы при удалении удалялся более не нужный календарь
+
   removeElement() {
     super.removeElement();
 
@@ -210,6 +211,9 @@ export default class PointEditView extends AbstractStatefulView {
     this.element
       .querySelector('.event__save-btn')
       .addEventListener('click', this.#formSubmitHandler);
+    this.element
+      .querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#handleFormClose);
 
     this.#setDatepicker();
   }
