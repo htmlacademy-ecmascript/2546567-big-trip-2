@@ -1,10 +1,12 @@
 import Observable from '../framework/observable.js';
 import {UpdateType} from '../const.js';
-import { offersData } from '../mocks/offer-model.js';
-import { destinationsData } from '../mocks/destinations-model.js';
+// import { offersData } from '../mocks/offer-model.js';
+// import { destinationsData } from '../mocks/destinations-model.js';
 
 export default class PointsModel extends Observable {
   #pointsApiService = null;
+  #destinations = [];
+  #offers = [];
   #points = [];
 
   constructor({pointsApiService}) {
@@ -25,11 +27,38 @@ export default class PointsModel extends Observable {
     try {
       const points = await this.#pointsApiService.points;
       this.#points = points.map(this.#adaptToClient);
+      console.log('Пришли points', this.#points);
+
+
+      this.#destinations = await this.#pointsApiService.destinations;
+      console.log('Пришли destinations', this.#destinations);
+      if(this.#destinations.length) {
+        const updatedPoints = this.#points.map((point) => {
+          const currentDestination = this.#destinations.find((destination) => destination.id === point.destination);
+          const updatePoint = {...point, destination: currentDestination};
+          return updatePoint;
+        });
+        console.log('Улучшенные поинты', updatedPoints);
+        this.#points = updatedPoints;
+      }
+
+      this.#offers = await this.#pointsApiService.offers;
+      console.log('Пришли offers', this.#offers);
+      //Тут разложить оферы в поинты
+      if(this.#offers.length) { }
+
+
+      this._notify(UpdateType.INIT);
     } catch(err) {
-      // this.#points = [];
+      console.log('Ошибка:', err);
+
+      this.#points = [];
+      this.#destinations = [];
+      this.#offers = [];
+
+      this._notify(UpdateType.ERROR);
     }
 
-    this._notify(UpdateType.INIT);
   }
 
   async updatePoint(updateType, update) {
@@ -42,7 +71,7 @@ export default class PointsModel extends Observable {
     try {
       // const response = await this.#pointsApiService.updatePoint(update);
       // const updatedPoint = this.#adaptToClient(response);
-      // пока без сервера...
+      //  пока без сервера...
       const updatedPoint = update;
 
       this.#points = [
@@ -77,7 +106,6 @@ export default class PointsModel extends Observable {
     }
 
     try {
-      //  метод удаления задачи на сервере
       await this.#pointsApiService.deletePoint(update);
       this.#points = [
         ...this.#points.slice(0, index),
@@ -90,20 +118,18 @@ export default class PointsModel extends Observable {
   }
 
   #adaptToClient(point) {
-    const currentOffers = offersData.find((item) => item.type === point.type).offers;
-    const currentDestination = destinationsData.find((item) => item.name === point.destination.name);
+    // const currentOffers = this.#offers.find((item) => item.type === point.type).offers;
+    // const currentDestination = destinationsData.find((item) => item.name === point.destination.name);
 
     const adaptedPoint = {...point,
-      offers: currentOffers,
-      destination: currentDestination,
+      // offers: currentOffers,
+      // destination: currentDestination,
       isFavorite: point['is_favorite'],
       basePrice: point['base_price'],
       dateFrom: point['date_from'],
       dateTo: point['date_to'],
-      // dueDate: point['due_date'] !== null ? new Date(point['due_date']) : point['due_date'], // На клиенте дата хранится как экземпляр Date
     };
 
-    // Ненужные ключи мы удаляем
     delete adaptedPoint['is_favorite'];
     delete adaptedPoint['base_price'];
     delete adaptedPoint['date_from'];

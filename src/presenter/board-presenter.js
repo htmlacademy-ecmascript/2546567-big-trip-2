@@ -46,7 +46,8 @@ class BoardPresenter {
     this.#newPointPresenter = new NewPointPresenter({
       pointListContainer: this.#pointListComponent.element,
       onDataChange: this.#handleViewAction,
-      onDestroy: onNewPointDestroy
+      onDestroy: onNewPointDestroy,
+      pointsModel
     });
 
     this.#pointsModel.addObserver(this.#handleModelEvent);

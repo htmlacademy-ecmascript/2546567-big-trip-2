@@ -1,5 +1,4 @@
 const destinationsData = [
-  // массив пунктов назначений
   {
     id: '13',
     description: 'Geneva never sleeps.',

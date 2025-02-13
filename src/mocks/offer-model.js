@@ -1,5 +1,4 @@
 const offersData = [
-  // Получение списка дополнительных предложений
   {
     type: 'taxi',
     offers: [
