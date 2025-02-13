@@ -1,6 +1,6 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import 'flatpickr/dist/flatpickr.min.css';
-import { destinationsData } from '../mocks/destinations-model.js';
+// import { destinationsData } from '../mocks/destinations-model.js';
 import { offersData } from '../mocks/offer-model.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -46,7 +46,9 @@ const BLANK_POINT = {
   type: 'Bus',
 };
 
-function createEditPointTemplate(point) {
+function createEditPointTemplate(point, destinations) {
+  console.log('33333', destinations);
+
   const idEditing = !!point.id;
 
   return `
@@ -85,7 +87,7 @@ function createEditPointTemplate(point) {
   point.destination.name
 }" list="destination-list-1">
           <datalist id="destination-list-1">
-            ${destinationsData
+            ${destinations
     .map(
       (destination) => `<option value="${destination.name}"></option>`
     )
@@ -162,19 +164,22 @@ export default class PointEditView extends AbstractStatefulView {
   #datepickerFrom = null;
   #datepickerTo = null;
   #handleFormClose = null;
+  #destinations = [];
 
-  constructor({ point = BLANK_POINT, onFormSubmit, onDeleteClick, onFormClose }) {
+  constructor({ point = BLANK_POINT, onFormSubmit, onDeleteClick, onFormClose, destinationsModel }) {
     super();
     this._setState(PointEditView.parsePointToState(point));
     this.#handleFormSubmit = onFormSubmit;
     this.#handleDeleteClick = onDeleteClick;
     this.#handleFormClose = onFormClose;
+    this.#destinations = destinationsModel.destinations;
+    console.log('this.#destinations', this.#destinations);
 
     this._restoreHandlers();
   }
 
   get template() {
-    return createEditPointTemplate(this._state);
+    return createEditPointTemplate(this._state, this.#destinations);
   }
 
 
@@ -237,7 +242,7 @@ export default class PointEditView extends AbstractStatefulView {
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
 
-    const currentDestination = destinationsData.find(
+    const currentDestination = this.#destinations.find(
       (element) => element.name === evt.target.value
     );
     const newPoint = {

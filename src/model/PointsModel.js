@@ -24,14 +24,15 @@ export default class PointsModel extends Observable {
   }
 
   async init() {
+
     try {
+      this.#destinations = await this.#pointsApiService.destinations;
+      console.log('Пришли destinations', this.#destinations);
+
       const points = await this.#pointsApiService.points;
       this.#points = points.map(this.#adaptToClient);
       console.log('Пришли points', this.#points);
 
-
-      this.#destinations = await this.#pointsApiService.destinations;
-      console.log('Пришли destinations', this.#destinations);
       if(this.#destinations.length) {
         const updatedPoints = this.#points.map((point) => {
           const currentDestination = this.#destinations.find((destination) => destination.id === point.destination);

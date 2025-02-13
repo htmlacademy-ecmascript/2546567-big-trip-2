@@ -6,16 +6,13 @@ export default class NewPointPresenter {
   #pointListContainer = null;
   #handleDataChange = null;
   #handleDestroy = null;
-  #pointsModel = null;
-
 
   #pointEditComponent = null;
 
-  constructor({pointListContainer, onDataChange, onDestroy, pointsModel}) {
+  constructor({pointListContainer, onDataChange, onDestroy}) {
     this.#pointListContainer = pointListContainer;
     this.#handleDataChange = onDataChange;
     this.#handleDestroy = onDestroy;
-    this.#pointsModel = pointsModel;
   }
 
   init() {
@@ -25,8 +22,7 @@ export default class NewPointPresenter {
 
     this.#pointEditComponent = new PointEditView({
       onFormSubmit: this.#handleFormSubmit,
-      onDeleteClick: this.#handleDeleteClick,
-      pointsModel:this.#pointsModel
+      onDeleteClick: this.#handleDeleteClick
     });
 
     render(this.#pointEditComponent, this.#pointListContainer, RenderPosition.AFTERBEGIN);
