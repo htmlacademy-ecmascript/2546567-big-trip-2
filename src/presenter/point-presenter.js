@@ -13,7 +13,6 @@ export default class PointPresenter {
   #pointListContainer = null;
   #handleDataChange = null;
   #handleModeChange = null;
-  #destinationsModel = null;
 
   #pointComponent = null;
   #pointEditComponent = null;
@@ -21,11 +20,10 @@ export default class PointPresenter {
   #point = null;
   #mode = Mode.DEFAULT;
 
-  constructor({pointListContainer, onDataChange, onModeChange, destinationsModel}) {
+  constructor({pointListContainer, onDataChange, onModeChange}) {
     this.#pointListContainer = pointListContainer;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
-    this.#destinationsModel = destinationsModel;
   }
 
   init(point) {
@@ -45,7 +43,6 @@ export default class PointPresenter {
       onFormSubmit: this.#handleFormSubmit,
       onDeleteClick: this.#handleDeleteClick,
       onFormClose: this.#handleCloseFormClick,
-      destinationsModel: this.#destinationsModel,
     });
 
     if (prevPointComponent === null || prevPointEditComponent === null) {
@@ -138,7 +135,6 @@ export default class PointPresenter {
     evt.preventDefault();
     this.#pointEditComponent.reset(this.#point);
     this.#replaceFormToCard();
-
   };
 
   #handleEditClick = () => {
@@ -162,16 +158,8 @@ export default class PointPresenter {
   };
 
   #handleFormSubmit = (update) => {
-    // Проверяем, поменялись ли в задаче данные, которые попадают под фильтрацию,
-    // а значит требуют перерисовки списка - если таких нет, это PATCH-обновление
-
-    // const isMinorUpdate =
-    //   !isDatesEqual(this.#point.dueDate, update.dueDate) ||
-    //   isPointRepeating(this.#point.repeating) !== isPointRepeating(update.repeating);
-
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
-      // isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       UpdateType.PATCH,
       update,
     );

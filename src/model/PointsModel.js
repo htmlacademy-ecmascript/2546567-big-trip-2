@@ -1,7 +1,6 @@
 import Observable from '../framework/observable.js';
 import {UpdateType} from '../const.js';
-// import { offersData } from '../mocks/offer-model.js';
-// import { destinationsData } from '../mocks/destinations-model.js';
+import { destinationsModel, offersModel } from '../main.js';
 
 export default class PointsModel extends Observable {
   #pointsApiService = null;
@@ -18,6 +17,10 @@ export default class PointsModel extends Observable {
     return this.#points;
   }
 
+  get destinations() {
+    return this.#destinations;
+  }
+
   set points(points) {
     this.#points = points;
     this._notify(UpdateType.MAJOR, this.#points);
@@ -27,31 +30,24 @@ export default class PointsModel extends Observable {
 
     try {
       this.#destinations = await this.#pointsApiService.destinations;
-      console.log('Пришли destinations', this.#destinations);
+      destinationsModel.destinations = this.#destinations;
 
       const points = await this.#pointsApiService.points;
       this.#points = points.map(this.#adaptToClient);
-      console.log('Пришли points', this.#points);
-
       if(this.#destinations.length) {
         const updatedPoints = this.#points.map((point) => {
           const currentDestination = this.#destinations.find((destination) => destination.id === point.destination);
           const updatePoint = {...point, destination: currentDestination};
           return updatePoint;
         });
-        console.log('Улучшенные поинты', updatedPoints);
+
         this.#points = updatedPoints;
       }
 
       this.#offers = await this.#pointsApiService.offers;
-      console.log('Пришли offers', this.#offers);
-      //Тут разложить оферы в поинты
-      if(this.#offers.length) { }
-
-
+      offersModel.offers = this.#offers;
       this._notify(UpdateType.INIT);
     } catch(err) {
-      console.log('Ошибка:', err);
 
       this.#points = [];
       this.#destinations = [];
@@ -70,10 +66,18 @@ export default class PointsModel extends Observable {
     }
 
     try {
-      // const response = await this.#pointsApiService.updatePoint(update);
-      // const updatedPoint = this.#adaptToClient(response);
-      //  пока без сервера...
-      const updatedPoint = update;
+      const response = await this.#pointsApiService.updatePoint(update);
+      const adaptedPoint = this.#adaptToClient(response);
+
+      const currentDestination = this.#destinations.find((destination) => destination.id === adaptedPoint.destination);
+
+      const currentOffersData = this.#offers.find((item) => item.type === adaptedPoint.type);
+      const updatedOffers = adaptedPoint.offers.map((offerId) => {
+        const offerObj = currentOffersData.offers.find((item) => item.id === offerId);
+        return offerObj;
+      });
+
+      const updatedPoint = {...adaptedPoint, destination:currentDestination, offers: updatedOffers };
 
       this.#points = [
         ...this.#points.slice(0, index),
@@ -81,6 +85,8 @@ export default class PointsModel extends Observable {
         ...this.#points.slice(index + 1),
       ];
       this._notify(updateType, updatedPoint);
+
+
     } catch(err) {
       throw new Error('Can\'t update point');
     }
@@ -88,7 +94,6 @@ export default class PointsModel extends Observable {
 
   async addPoint(updateType, update) {
     try {
-      // const response = await this.#pointsApiService.addPoint(update);
       const response = {...update};
       const newPoint = this.#adaptToClient(response);
 
@@ -119,12 +124,7 @@ export default class PointsModel extends Observable {
   }
 
   #adaptToClient(point) {
-    // const currentOffers = this.#offers.find((item) => item.type === point.type).offers;
-    // const currentDestination = destinationsData.find((item) => item.name === point.destination.name);
-
     const adaptedPoint = {...point,
-      // offers: currentOffers,
-      // destination: currentDestination,
       isFavorite: point['is_favorite'],
       basePrice: point['base_price'],
       dateFrom: point['date_from'],

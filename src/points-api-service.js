@@ -1,5 +1,4 @@
 import ApiService from './framework/api-service.js';
-// import { points } from './mocks/points-model.js';
 
 const Method = {
   GET: 'GET',
@@ -58,17 +57,20 @@ export default class PointsApiService extends ApiService {
   #adaptToServer(point) {
     const adaptedPoint = {
       ...point,
-      // 'due_date': point.dueDate instanceof Date ? point.dueDate.toISOString() : null,
       'is_favorite': point.isFavorite,
       'base_price': parseInt(point.basePrice, 10),
       'date_from' :point.dateFrom,
       'date_to' :point.dateTo,
+      'destination' :point.destination.id,
     };
 
     delete adaptedPoint.isFavorite;
     delete adaptedPoint.basePrice;
-    delete adaptedPoint.dataFrom;
-    delete adaptedPoint.dataTo;
+    delete adaptedPoint.dateFrom;
+    delete adaptedPoint.dateTo;
+    delete adaptedPoint.isDisabled;
+    delete adaptedPoint.isSaving;
+    delete adaptedPoint.isDeleting;
     return adaptedPoint;
   }
 }
