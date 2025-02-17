@@ -88,19 +88,17 @@ class BoardPresenter {
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
+
         this.#pointPresenters.get(data.id).init(data);
         break;
-
       case UpdateType.MINOR:
         this.#clearBoard();
         this.#renderBoard();
         break;
-
       case UpdateType.MAJOR:
         this.#clearBoard({resetRenderedPointCount: true, resetSortType: true});
         this.#renderBoard();
         break;
-
       case UpdateType.INIT:
         this.#isLoading = false;
         remove(this.#loadingComponent);
@@ -125,8 +123,8 @@ class BoardPresenter {
           await this.#pointsModel.updatePoint(updateType, update);
           this.#isLoading = false;
           remove(this.#loadingComponent);
-        }
-         catch(err) {
+
+        } catch(err) {
           this.#pointPresenters.get(update.id).setAborting();
         }
         break;
@@ -234,9 +232,8 @@ class BoardPresenter {
 
     this.#renderSort();
     render(this.#pointListComponent, this.#boardComponent.element);
-    this.#renderPoints(points.slice(0, Math.min(pointCount, this.#renderedPointCount)));
 
-    if (pointCount > this.#renderedPointCount)
+    this.#renderPoints(points.slice(0, Math.min(pointCount, this.#renderedPointCount)));
   }
 }
 export { BoardPresenter };

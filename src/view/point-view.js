@@ -21,6 +21,7 @@ function createPointTemplate(point) {
 
   const allOffers = offersModel.offers;
   const offers = allOffers.find((item) => item.type === point.type).offers;
+
   const currentOffers = point.offers.map((id) => {
     const offerObj = offers.find((offer) => offer.id === id);
     return offerObj;
@@ -49,9 +50,9 @@ function createPointTemplate(point) {
         <ul class="event__selected-offers">
           ${currentOffers.map((item) => `
             <li class="event__offer">
-              <span class="event__offer-title">${item.title}</span>
+              <span class="event__offer-title">${item?.title || ''}</span>
               &plus;&euro;&nbsp;
-              <span class="event__offer-price">${item.price}</span>
+              <span class="event__offer-price">${item?.price || ''}</span>
             </li>
           `).join('')}
         </ul>
@@ -73,14 +74,12 @@ export default class PointView extends AbstractView {
   #point = null;
   #handleEditClick = null;
   #handleFavoriteClick = null;
-  #handleArchiveClick = null;
 
-  constructor({point, onEditClick, onFavoriteClick, onArchiveClick}) {
+  constructor({point, onEditClick, onFavoriteClick}) {
     super();
     this.#point = point;
     this.#handleEditClick = onEditClick;
     this.#handleFavoriteClick = onFavoriteClick;
-    this.#handleArchiveClick = onArchiveClick;
 
     this.element.querySelector('.event__rollup-btn')
       .addEventListener('click', this.#editClickHandler);
@@ -100,10 +99,5 @@ export default class PointView extends AbstractView {
   #favoriteClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleFavoriteClick();
-  };
-
-  #archiveClickHandler = (evt) => {
-    evt.preventDefault();
-    this.#handleArchiveClick();
   };
 }

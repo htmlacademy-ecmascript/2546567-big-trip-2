@@ -55,7 +55,6 @@ export default class PointsModel extends Observable {
 
       this._notify(UpdateType.ERROR);
     }
-
   }
 
   async updatePoint(updateType, update) {
@@ -71,13 +70,8 @@ export default class PointsModel extends Observable {
 
       const currentDestination = this.#destinations.find((destination) => destination.id === adaptedPoint.destination);
 
-      const currentOffersData = this.#offers.find((item) => item.type === adaptedPoint.type);
-      const updatedOffers = adaptedPoint.offers.map((offerId) => {
-        const offerObj = currentOffersData.offers.find((item) => item.id === offerId);
-        return offerObj;
-      });
 
-      const updatedPoint = {...adaptedPoint, destination:currentDestination, offers: updatedOffers };
+      const updatedPoint = {...adaptedPoint, destination:currentDestination };
 
       this.#points = [
         ...this.#points.slice(0, index),
