@@ -1,5 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import dayjs from 'dayjs';
+import { offersModel } from '../main.js';
 
 function getFormattedDifferenceTime(pointDateFrom, pointDateTo) {
   const time1 = dayjs(pointDateFrom);
@@ -17,6 +18,14 @@ function createPointTemplate(point) {
   const timeFrom = dayjs(point.dateFrom).format('HH:mm');
   const timeTo = dayjs(point.dateTo).format('HH:mm');
   const formattedDifference = getFormattedDifferenceTime(point.dateFrom, point.dateTo);
+
+  const allOffers = offersModel.offers;
+  const offers = allOffers.find((item) => item.type === point.type).offers;
+
+  const currentOffers = point.offers.map((id) => {
+    const offerObj = offers.find((offer) => offer.id === id);
+    return offerObj;
+  });
 
   return `
     <li class="trip-events__item">
@@ -39,11 +48,11 @@ function createPointTemplate(point) {
         </p>
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          ${point.offers.map((item) => `
+          ${currentOffers.map((item) => `
             <li class="event__offer">
-              <span class="event__offer-title">${item.title}</span>
+              <span class="event__offer-title">${item?.title || ''}</span>
               &plus;&euro;&nbsp;
-              <span class="event__offer-price">${item.price}</span>
+              <span class="event__offer-price">${item?.price || ''}</span>
             </li>
           `).join('')}
         </ul>
@@ -65,21 +74,17 @@ export default class PointView extends AbstractView {
   #point = null;
   #handleEditClick = null;
   #handleFavoriteClick = null;
-  #handleArchiveClick = null;
 
-  constructor({point, onEditClick, onFavoriteClick, onArchiveClick}) {
+  constructor({point, onEditClick, onFavoriteClick}) {
     super();
     this.#point = point;
     this.#handleEditClick = onEditClick;
     this.#handleFavoriteClick = onFavoriteClick;
-    this.#handleArchiveClick = onArchiveClick;
 
     this.element.querySelector('.event__rollup-btn')
       .addEventListener('click', this.#editClickHandler);
     this.element.querySelector('.event__favorite-btn')
       .addEventListener('click', this.#favoriteClickHandler);
-    // this.element.querySelector('.card__btn--archive')
-    //   .addEventListener('click', this.#archiveClickHandler);
   }
 
   get template() {
@@ -94,10 +99,5 @@ export default class PointView extends AbstractView {
   #favoriteClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleFavoriteClick();
-  };
-
-  #archiveClickHandler = (evt) => {
-    evt.preventDefault();
-    this.#handleArchiveClick();
   };
 }

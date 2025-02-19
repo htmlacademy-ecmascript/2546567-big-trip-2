@@ -42,7 +42,7 @@ export default class PointPresenter {
       point: this.#point,
       onFormSubmit: this.#handleFormSubmit,
       onDeleteClick: this.#handleDeleteClick,
-      onFormClose: this.#handleCloseFormClick
+      onFormClose: this.#handleCloseFormClick,
     });
 
     if (prevPointComponent === null || prevPointEditComponent === null) {
@@ -135,7 +135,6 @@ export default class PointPresenter {
     evt.preventDefault();
     this.#pointEditComponent.reset(this.#point);
     this.#replaceFormToCard();
-
   };
 
   #handleEditClick = () => {
@@ -159,16 +158,8 @@ export default class PointPresenter {
   };
 
   #handleFormSubmit = (update) => {
-    // Проверяем, поменялись ли в задаче данные, которые попадают под фильтрацию,
-    // а значит требуют перерисовки списка - если таких нет, это PATCH-обновление
-
-    // const isMinorUpdate =
-    //   !isDatesEqual(this.#point.dueDate, update.dueDate) ||
-    //   isPointRepeating(this.#point.repeating) !== isPointRepeating(update.repeating);
-
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
-      // isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       UpdateType.PATCH,
       update,
     );

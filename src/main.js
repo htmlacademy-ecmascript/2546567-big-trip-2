@@ -5,13 +5,18 @@ import PointsModel from './model/PointsModel.js';
 import { BoardPresenter } from './presenter/board-presenter.js';
 import NewPointButtonView from './view/new_point_button_view.js';
 import { render } from './framework/render.js';
+import DestinationsModel from './model/DestinationsModel.js';
+import OffersModel from './model/OffersModel.js';
 
-const AUTHORIZATION = 'Basic hS2sfS44wcl1sa2j';
-const END_POINT = 'https://21.objects.pages.academy/point-manager';
+const AUTHORIZATION = 'Basic hS5syS74pcl1la7j';
+const END_POINT = 'https://22.objects.htmlacademy.pro/big-trip';
 
 const tripMainContainer = document.querySelector('.trip-main');
 const tripEventsContainer = document.querySelector('.trip-events');
 const filtersContainer = document.querySelector('.trip-controls__filters');
+
+export const destinationsModel = new DestinationsModel();
+export const offersModel = new OffersModel();
 
 const pointsModel = new PointsModel({
   pointsApiService: new PointsApiService(END_POINT, AUTHORIZATION)
@@ -47,6 +52,8 @@ function handleNewPointButtonClick() {
 
 filterPresenter.init();
 boardPresenter.init();
+
+
 pointsModel.init()
   .finally(() => {
     render(newPointButtonComponent, tripMainContainer);

@@ -46,7 +46,7 @@ class BoardPresenter {
     this.#newPointPresenter = new NewPointPresenter({
       pointListContainer: this.#pointListComponent.element,
       onDataChange: this.#handleViewAction,
-      onDestroy: onNewPointDestroy
+      onDestroy: onNewPointDestroy,
     });
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
@@ -88,6 +88,7 @@ class BoardPresenter {
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
+
         this.#pointPresenters.get(data.id).init(data);
         break;
       case UpdateType.MINOR:
@@ -120,6 +121,9 @@ class BoardPresenter {
         this.#pointPresenters.get(update.id).setSaving();
         try {
           await this.#pointsModel.updatePoint(updateType, update);
+          this.#isLoading = false;
+          remove(this.#loadingComponent);
+
         } catch(err) {
           this.#pointPresenters.get(update.id).setAborting();
         }
@@ -134,14 +138,6 @@ class BoardPresenter {
         break;
       case UserAction.DELETE_POINT:
         this.#pointsModel.points = this.#pointsModel.points.filter((item) => item.id !== update.id);
-
-        //Код для api, когда оно заработает
-        // this.#pointPresenters.get(update.id).setDeleting();
-        // try {
-        //   await this.#pointsModel.deletePoint(updateType, update);
-        // } catch(err) {
-        //   this.#pointPresenters.get(update.id).setAborting();
-        // }
         break;
     }
 
@@ -152,7 +148,7 @@ class BoardPresenter {
     const pointPresenter = new PointPresenter({
       pointListContainer: this.#pointListComponent.element,
       onDataChange: this.#handleViewAction,
-      onModeChange: this.#handleModeChange
+      onModeChange: this.#handleModeChange,
     });
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
@@ -202,7 +198,6 @@ class BoardPresenter {
 
     remove(this.#sortComponent);
     remove(this.#loadingComponent);
-    // remove(this.#loadMoreButtonComponent);
 
     if (this.#noPointComponent) {
       remove(this.#noPointComponent);
@@ -211,9 +206,6 @@ class BoardPresenter {
     if (resetRenderedPointCount) {
       this.#renderedPointCount = POINT_COUNT_PER_STEP;
     } else {
-      // На случай, если перерисовка доски вызвана
-      // уменьшением количества задач (например, удаление или перенос в архив)
-      // нужно скорректировать число показанных задач
       this.#renderedPointCount = Math.min(pointCount, this.#renderedPointCount);
     }
 
@@ -241,16 +233,7 @@ class BoardPresenter {
     this.#renderSort();
     render(this.#pointListComponent, this.#boardComponent.element);
 
-    // Теперь, когда #renderBoard рендерит доску не только на старте,
-    // но и по ходу работы приложения, нужно заменить
-    // константу Point_COUNT_PER_STEP на свойство #renderedPointCount,
-    // чтобы в случае перерисовки сохранить N-показанных карточек
-
     this.#renderPoints(points.slice(0, Math.min(pointCount, this.#renderedPointCount)));
-
-    if (pointCount > this.#renderedPointCount) {
-      // this.#renderLoadMoreButton();
-    }
   }
 }
 export { BoardPresenter };
