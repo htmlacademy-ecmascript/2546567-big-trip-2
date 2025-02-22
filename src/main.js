@@ -5,7 +5,7 @@ import PointsModel from './model/PointsModel.js';
 import { BoardPresenter } from './presenter/board-presenter.js';
 import NewPointButtonView from './view/new_point_button_view.js';
 import { render } from './framework/render.js';
-import DestinationsModel from './model/DestinationsModel.js';
+import DestinationsModel from './model/destinationsModel.js';
 import OffersModel from './model/OffersModel.js';
 
 const AUTHORIZATION = 'Basic hS5syS74pcl1la7j';
