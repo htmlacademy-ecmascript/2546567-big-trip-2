@@ -21,6 +21,10 @@ export default class PointsModel extends Observable {
     return this.#destinations;
   }
 
+  get offers() {
+    return this.#offers;
+  }
+
   set points(points) {
     this.#points = points;
     this._notify(UpdateType.MAJOR, this.#points);
@@ -65,12 +69,10 @@ export default class PointsModel extends Observable {
     }
 
     try {
-      const response = await this.#pointsApiService.updatePoint(update);
+      const response = await this.#pointsApiService.updatePoint({...update, destination: update.destination.id});
       const adaptedPoint = this.#adaptToClient(response);
 
       const currentDestination = this.#destinations.find((destination) => destination.id === adaptedPoint.destination);
-
-
       const updatedPoint = {...adaptedPoint, destination:currentDestination };
 
       this.#points = [
@@ -88,11 +90,19 @@ export default class PointsModel extends Observable {
 
   async addPoint(updateType, update) {
     try {
-      const response = {...update};
-      const newPoint = this.#adaptToClient(response);
+      const adaptedPoint = {
+        ...update,
+        destination: update.destination.id
+      };
 
-      this.#points = [newPoint, ...this.#points];
-      this._notify(updateType, newPoint);
+      const response = await this.#pointsApiService.addPoint(adaptedPoint);
+
+      const newPoint = this.#adaptToClient(response);
+      const currentDestination = this.#destinations.find((destination) => destination.id === newPoint.destination);
+      const updatedPoint = {...newPoint, destination:currentDestination };
+
+      this.#points = [updatedPoint, ...this.#points];
+      this._notify(updateType, updatedPoint);
     } catch(err) {
       throw new Error('Can\'t add point');
     }

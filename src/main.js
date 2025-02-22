@@ -18,7 +18,7 @@ const filtersContainer = document.querySelector('.trip-controls__filters');
 export const destinationsModel = new DestinationsModel();
 export const offersModel = new OffersModel();
 
-const pointsModel = new PointsModel({
+export const pointsModel = new PointsModel({
   pointsApiService: new PointsApiService(END_POINT, AUTHORIZATION)
 });
 

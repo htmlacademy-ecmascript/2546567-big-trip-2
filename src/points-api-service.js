@@ -61,7 +61,7 @@ export default class PointsApiService extends ApiService {
       'base_price': parseInt(point.basePrice, 10),
       'date_from' :point.dateFrom,
       'date_to' :point.dateTo,
-      'destination' :point.destination.id,
+      'destination' :point.destination,
     };
 
     delete adaptedPoint.isFavorite;

@@ -10,7 +10,7 @@ import SortView from '../view/sort-view.js';
 import NewPointPresenter from './new-point-presenter.js';
 import PointPresenter from './point-presenter.js';
 
-const POINT_COUNT_PER_STEP = 8;
+const POINT_COUNT_PER_STEP = 30;
 const TimeLimit = {
   LOWER_LIMIT: 350,
   UPPER_LIMIT: 1000,
@@ -132,12 +132,20 @@ class BoardPresenter {
         this.#newPointPresenter.setSaving();
         try {
           await this.#pointsModel.addPoint(updateType, update);
+          this.#isLoading = false;
+          remove(this.#loadingComponent);
         } catch(err) {
           this.#newPointPresenter.setAborting();
         }
         break;
       case UserAction.DELETE_POINT:
-        this.#pointsModel.points = this.#pointsModel.points.filter((item) => item.id !== update.id);
+        try {
+          await this.#pointsModel.deletePoint(updateType, update);
+          this.#isLoading = false;
+          remove(this.#loadingComponent);
+        } catch(err) {
+          this.#newPointPresenter.setAborting();
+        }
         break;
     }
 

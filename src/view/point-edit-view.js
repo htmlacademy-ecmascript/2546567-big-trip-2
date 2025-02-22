@@ -5,6 +5,8 @@ import 'flatpickr/dist/flatpickr.min.css';
 import dayjs from 'dayjs';
 import { destinationsModel, offersModel } from '../main.js';
 
+const DEFAULT_TYPE = 'flight';
+// const DEFAULT_OFFERS = pointsModel.offers.find((item) => item.type === DEFAULT_TYPE);
 const EVENT_TYPES = [
   'taxi',
   'bus',
@@ -16,36 +18,6 @@ const EVENT_TYPES = [
   'sightseeing',
   'restaurant',
 ];
-
-const BLANK_POINT = {
-  basePrice: 1600,
-  dateFrom: '2024-12-10T10:55:56.845Z',
-  dateTo: '2024-12-16T12:22:15.375Z',
-  destination: {
-    name: 'Amsterdam',
-    description: 'В Амстердаме открыли первый в мире порнотеатр',
-    pictures:[]
-  },
-  isFavorite: false,
-  offers: [
-    {
-      id: 'b4c3e4e6-9053-42ce-b747-e281314baa31',
-      title: 'Upgrade to a economy class',
-      price: 100,
-    },
-    {
-      id: 'b4c3e4e6-9053-42ce-b747-e281314baa32',
-      title: 'Upgrade to a comfort class',
-      price: 150,
-    },
-    {
-      id: 'b4c3e4e6-9053-42ce-b747-e281314baa33',
-      title: 'Upgrade to a vip class',
-      price: 200,
-    },
-  ],
-  type: 'bus',
-};
 
 function createEditPointTemplate(point, destinations) {
   const idEditing = !!point.id;
@@ -85,9 +57,8 @@ function createEditPointTemplate(point, destinations) {
           <label class="event__label event__type-output" for="event-destination-1">${
   point.type
 }</label>
-          <input class="event__input event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${
-  point.destination.name
-}" list="destination-list-1">
+          <input class="event__input event__input--destination" id="event-destination-1" type="text" name="event-destination"
+          value="${point.destination ? point.destination.name : ''}" list="destination-list-1">
           <datalist id="destination-list-1">
             ${destinations
     .map(
@@ -99,10 +70,10 @@ function createEditPointTemplate(point, destinations) {
 
         <div class="event__field-group event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input event__input--time" id="event-start-time-1" type="text" name="event-start-time" value=${dayjs(point.dateFrom).format('DD/MM/YY HH:mm')}>
+          <input class="event__input event__input--time" id="event-start-time-1" type="text" name="event-start-time" value=${point.dateFrom ? dayjs(point.dateFrom).format('DD/MM/YY HH:mm') : ''}>
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input event__input--time" id="event-end-time-1" type="text" name="event-end-time" value=${dayjs(point.dateTo).format('DD/MM/YY HH:mm')}>
+          <input class="event__input event__input--time" id="event-end-time-1" type="text" name="event-end-time" value=${point.dateTo ? dayjs(point.dateTo).format('DD/MM/YY HH:mm') : ''}>
         </div>
 
         <div class="event__field-group event__field-group--price">
@@ -140,8 +111,8 @@ function createEditPointTemplate(point, destinations) {
     .join('')}
           </div>
         </section>
-
-        <section class="event__section event__section--destination">
+          ${point.destination ? `
+                  <section class="event__section event__section--destination">
           <h3 class="event__section-title event__section-title--destination">Destination</h3>
           <p class="event__destination-description">${
   point.destination.description
@@ -158,6 +129,8 @@ function createEditPointTemplate(point, destinations) {
             </div>
           </div>
         </section>
+          ` : ''}
+
       </section>
     </form>
   </li>
@@ -172,9 +145,25 @@ export default class PointEditView extends AbstractStatefulView {
   #handleFormClose = null;
   #destinations = [];
 
-  constructor({ point = BLANK_POINT, onFormSubmit, onDeleteClick, onFormClose }) {
+  constructor({ point, onFormSubmit, onDeleteClick, onFormClose }) {
     super();
-    this._setState(PointEditView.parsePointToState(point));
+    if(point) {
+
+      this._setState(PointEditView.parsePointToState(point));
+    } else {
+
+      const defaultPoint = {
+        basePrice: 0,
+        dateFrom: null,
+        dateTo: null,
+        destination: null,
+        isFavorite: false,
+        offers: [],
+        type: DEFAULT_TYPE,
+      };
+      this._setState(PointEditView.parsePointToState(defaultPoint));
+
+    }
     this.#handleFormSubmit = onFormSubmit;
     this.#handleDeleteClick = onDeleteClick;
     this.#handleFormClose = onFormClose;
@@ -224,6 +213,9 @@ export default class PointEditView extends AbstractStatefulView {
       .querySelector('.event__reset-btn')
       .addEventListener('click', this.#formDeleteClickHandler);
     this.element
+      .querySelector('#event-price-1')
+      .addEventListener('change', this.#formChangeBasePrice);
+    this.element
       .querySelectorAll('.event__offer-checkbox').forEach((item) => {
         item.addEventListener('click', this.#offerCheckClick);
       });
@@ -251,6 +243,16 @@ export default class PointEditView extends AbstractStatefulView {
     this.updateElement(newPoint);
   };
 
+  #formChangeBasePrice = (evt) => {
+    evt.preventDefault();
+
+    const newPoint = {
+      ...this._state,
+      basePrice: evt.target.value,
+    };
+    this.updateElement(newPoint);
+  };
+
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
     const currentDestination = this.#destinations.find(
@@ -259,7 +261,6 @@ export default class PointEditView extends AbstractStatefulView {
 
     const newPoint = {
       ...this._state,
-      id: this._state.id ?? String(Math.random()),
       destination: currentDestination ? currentDestination : this.#destinations[0],
     };
 
