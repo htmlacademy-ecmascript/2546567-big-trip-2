@@ -1,6 +1,7 @@
 import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
 import { remove, render, RenderPosition } from '../framework/render.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+// import { pointsModel } from '../main.js';
 import { filter, sortPointByDayUp, sortPointByEventUp, sortPointByOffersUp, sortPointByPriceUp, sortPointByTimeDiffUp } from '../utils/helpers.js';
 import BoardView from '../view/board-view.js';
 import LoadingView from '../view/loading-view.js';
@@ -47,6 +48,7 @@ class BoardPresenter {
       pointListContainer: this.#pointListComponent.element,
       onDataChange: this.#handleViewAction,
       onDestroy: onNewPointDestroy,
+      onCancel: this.#onCancelBtnClick.bind(this), // Привязываем контекст
     });
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
@@ -83,6 +85,22 @@ class BoardPresenter {
     this.#currentSortType = SortType.DEFAULT;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
     this.#newPointPresenter.init();
+
+    if (this.#noPointComponent && !this.#pointsModel.points.length) {
+      remove(this.#noPointComponent);
+    }
+  }
+
+  #onCancelBtnClick() {
+    console.log('1111111111111111111', this.#pointsModel.points.length);
+
+    if (this.#pointsModel.points.length === 0) {
+      this.#noPointComponent = new NoPointView({
+        filterType: this.#filterType
+      });
+
+      render(this.#noPointComponent, this.#boardComponent.element, RenderPosition.AFTEREND);
+    }
   }
 
   #handleModelEvent = (updateType, data) => {
@@ -143,6 +161,9 @@ class BoardPresenter {
           await this.#pointsModel.deletePoint(updateType, update);
           this.#isLoading = false;
           remove(this.#loadingComponent);
+
+          // this.#clearBoard({resetRenderedPointCount: true});
+          // this.#renderBoard();
         } catch(err) {
           this.#newPointPresenter.setAborting();
         }
@@ -235,7 +256,7 @@ class BoardPresenter {
 
     if (pointCount === 0) {
       this.#renderNoPoints();
-      return;
+      // return;
     }
 
     this.#renderSort();

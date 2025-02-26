@@ -7,39 +7,48 @@ import NewPointButtonView from './view/new_point_button_view.js';
 import { render } from './framework/render.js';
 import DestinationsModel from './model/destinationsModel.js';
 import OffersModel from './model/OffersModel.js';
+import HeaderPresenter from './presenter/header-presenter.js';
 
 const AUTHORIZATION = 'Basic hS5syS74pcl1la7j';
-const END_POINT = 'https://22.objects.htmlacademy.pro/big-trip';
+const END_POINT = 'https://23.objects.htmlacademy.pro/big-trip';
 
 const tripMainContainer = document.querySelector('.trip-main');
 const tripEventsContainer = document.querySelector('.trip-events');
 const filtersContainer = document.querySelector('.trip-controls__filters');
 
+const newPointButtonComponent = new NewPointButtonView({
+  onClick: handleNewPointButtonClick,
+});
+
+render(newPointButtonComponent, tripMainContainer);
+
 export const destinationsModel = new DestinationsModel();
 export const offersModel = new OffersModel();
 
 export const pointsModel = new PointsModel({
-  pointsApiService: new PointsApiService(END_POINT, AUTHORIZATION)
+  pointsApiService: new PointsApiService(END_POINT, AUTHORIZATION),
 });
 
-const filterModel = new FilterModel();
+export const filterModel = new FilterModel();
 
-const boardPresenter = new BoardPresenter({
+const headerPresenter = new HeaderPresenter({
+  heandlerConteiner: tripMainContainer,
+  pointsModel,
+});
+
+export const boardPresenter = new BoardPresenter({
   boardContainer: tripEventsContainer,
   pointsModel,
   filterModel,
-  onNewPointDestroy: handleNewPointFormClose
+  onNewPointDestroy: handleNewPointFormClose,
 });
 
 const filterPresenter = new FilterPresenter({
   filterContainer: filtersContainer,
   filterModel,
-  pointsModel
+  pointsModel,
 });
 
-const newPointButtonComponent = new NewPointButtonView({
-  onClick: handleNewPointButtonClick
-});
 
 function handleNewPointFormClose() {
   newPointButtonComponent.element.disabled = false;
@@ -50,11 +59,11 @@ function handleNewPointButtonClick() {
   newPointButtonComponent.element.disabled = true;
 }
 
+
 filterPresenter.init();
 boardPresenter.init();
 
+pointsModel.init().finally(() => {
 
-pointsModel.init()
-  .finally(() => {
-    render(newPointButtonComponent, tripMainContainer);
-  });
+  headerPresenter.init();
+});
