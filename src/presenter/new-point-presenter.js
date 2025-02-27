@@ -15,8 +15,6 @@ export default class NewPointPresenter {
     this.#handleDataChange = onDataChange;
     this.#handleDestroy = onDestroy;
     this.#handleCancelClick = onCancel;
-    console.log('!!!!!!', this.#handleCancelClick);
-
   }
 
   init() {
@@ -83,7 +81,6 @@ export default class NewPointPresenter {
   };
 
   onCancelClick = () => {
-    console.log('aaaaaaaaaaaaaaaa');
     this.#handleCancelClick();
   };
 
