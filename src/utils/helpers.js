@@ -38,7 +38,7 @@ function sortPointByDayUp(pointA, pointB) {
 }
 
 function sortPointByPriceUp(pointA, pointB) {
-  return pointA.basePrice - pointB.basePrice;
+  return pointB.basePrice - pointA.basePrice;
 }
 
 function sortPointByEventUp(pointA, pointB) {
@@ -52,13 +52,17 @@ function sortPointByEventUp(pointA, pointB) {
 }
 
 function sortPointByTimeDiffUp(pointA, pointB) {
+  if (!pointA.dateTo || !pointA.dateFrom || !pointB.dateTo || !pointB.dateFrom) {
+    return 0; // Если даты отсутствуют, считаем точки равными
+  }
+
   const durationA = dayjs(pointA.dateTo).diff(dayjs(pointA.dateFrom));
   const durationB = dayjs(pointB.dateTo).diff(dayjs(pointB.dateFrom));
-  return durationA - durationB;
+  return durationB - durationA; // От самой долгой до самой короткой
 }
 
 function sortPointByOffersUp(pointA, pointB) {
-  return pointA.offers.length - pointB.offers.length;
+  return pointB.offers.length - pointA.offers.length;
 }
 
 

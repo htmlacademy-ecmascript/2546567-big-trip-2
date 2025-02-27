@@ -6,13 +6,15 @@ export default class NewPointPresenter {
   #pointListContainer = null;
   #handleDataChange = null;
   #handleDestroy = null;
+  #handleCancelClick = null;
 
   #pointEditComponent = null;
 
-  constructor({pointListContainer, onDataChange, onDestroy}) {
+  constructor({pointListContainer, onDataChange, onDestroy, onCancel}) {
     this.#pointListContainer = pointListContainer;
     this.#handleDataChange = onDataChange;
     this.#handleDestroy = onDestroy;
+    this.#handleCancelClick = onCancel;
   }
 
   init() {
@@ -23,6 +25,7 @@ export default class NewPointPresenter {
     this.#pointEditComponent = new PointEditView({
       onFormSubmit: this.#handleFormSubmit,
       onDeleteClick: this.#handleDeleteClick,
+      onCancelClick: this.#handleCancelClick,
     });
 
     render(this.#pointEditComponent, this.#pointListContainer, RenderPosition.AFTERBEGIN);
@@ -59,7 +62,10 @@ export default class NewPointPresenter {
       });
     };
 
-    this.#pointEditComponent.shake(resetFormState);
+    if(this.#pointEditComponent) {
+      this.#pointEditComponent.shake(resetFormState);
+    }
+
   }
 
   #handleFormSubmit = (point) => {
@@ -74,10 +80,15 @@ export default class NewPointPresenter {
     this.destroy();
   };
 
+  onCancelClick = () => {
+    this.#handleCancelClick();
+  };
+
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
       this.destroy();
+      this.#handleCancelClick();
     }
   };
 }

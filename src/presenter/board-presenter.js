@@ -47,6 +47,7 @@ class BoardPresenter {
       pointListContainer: this.#pointListComponent.element,
       onDataChange: this.#handleViewAction,
       onDestroy: onNewPointDestroy,
+      onCancel: this.#onCancelBtnClick.bind(this),
     });
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
@@ -83,6 +84,20 @@ class BoardPresenter {
     this.#currentSortType = SortType.DEFAULT;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
     this.#newPointPresenter.init();
+
+    if (this.#noPointComponent && !this.#pointsModel.points.length) {
+      remove(this.#noPointComponent);
+    }
+  }
+
+  #onCancelBtnClick() {
+    if (this.#pointsModel.points.length === 0) {
+      this.#noPointComponent = new NoPointView({
+        filterType: this.#filterType
+      });
+
+      render(this.#noPointComponent, this.#boardComponent.element, RenderPosition.AFTEREND);
+    }
   }
 
   #handleModelEvent = (updateType, data) => {
@@ -235,7 +250,6 @@ class BoardPresenter {
 
     if (pointCount === 0) {
       this.#renderNoPoints();
-      return;
     }
 
     this.#renderSort();
