@@ -85,7 +85,7 @@ export default class PointPresenter {
   }
 
   setDeleting() {
-    if (this.#mode === Mode.EDITING) {
+    if (this.#mode === Mode.DELETE_POINT) {
       this.#pointEditComponent.updateElement({
         isDisabled: true,
         isDeleting: true,
@@ -149,14 +149,6 @@ export default class PointPresenter {
     );
   };
 
-  #handleArchiveClick = () => {
-    this.#handleDataChange(
-      UserAction.UPDATE_POINT,
-      UpdateType.MINOR,
-      {...this.#point, isArchive: !this.#point.isArchive},
-    );
-  };
-
   #handleFormSubmit = (update) => {
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
@@ -166,10 +158,11 @@ export default class PointPresenter {
   };
 
   #handleDeleteClick = (point) => {
+    this.#mode = Mode.DELETE_POINT;
     this.#handleDataChange(
       UserAction.DELETE_POINT,
-      UpdateType.MINOR,
-      point,
+      UpdateType.MAJOR,
+      point
     );
   };
 }

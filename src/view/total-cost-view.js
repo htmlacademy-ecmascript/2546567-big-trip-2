@@ -5,7 +5,7 @@ const createTotalCostTemplete = (cost) => (
   Total:&euro;&nbsp;<span class="trip-info__cost-value">${cost}</span>
   </p>`);
 
-export default class TotalCost extends AbstractView {
+export default class TotalCostView extends AbstractView {
   #const = null;
 
   constructor(cost) {

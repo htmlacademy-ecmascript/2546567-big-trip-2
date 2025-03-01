@@ -25,6 +25,15 @@ function createEditPointTemplate(point, destinations) {
   const allOffers = offersModel.offers;
   const offers = allOffers.find((item) => item.type === point.type).offers;
 
+  const isDestinationDescription = !!point.destination?.description?.length;
+  const isDestinationPictures = !!point.destination?.pictures.length;
+  const isOffersLength = !!offers.length;
+
+  const showDestinationsContainer = isDestinationDescription || isDestinationPictures;
+
+  const saveBtnText = point.isSaving || point.isDisabled ? 'Saving...' : 'Save';
+  const deleteBtnText = point.isDeleting || point.isDisabled ? 'Deleting...' : 'Delete';
+
   return `
   <li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -82,8 +91,8 @@ function createEditPointTemplate(point, destinations) {
 }">
         </div>
 
-        <button class="event__save-btn btn btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">${idEditing ? 'Delete' : 'Cancel'
+        <button class="event__save-btn btn btn--blue" type="submit" ${point.isSaving || point.isDisabled ? 'disabled' : ''}>${saveBtnText}</button>
+        <button class="event__reset-btn btn" type="reset" ${point.isSaving || point.isDisabled ? 'disabled' : ''} >${idEditing ? deleteBtnText : 'Cancel'
 }</button>
         ${idEditing
     ? `<button class="event__rollup-btn" type="button">
@@ -94,38 +103,43 @@ function createEditPointTemplate(point, destinations) {
       </header>
 
       <section class="event__details">
-        <section class="event__section event__section--offers">
-          <h3 class="event__section-title event__section-title--offers">Offers</h3>
-          <div class="event__available-offers">
-            ${offers
+      ${isOffersLength ?
+    `
+    <section class="event__section event__section--offers">
+      <h3 class="event__section-title event__section-title--offers">Offers</h3>
+      <div class="event__available-offers">
+        ${offers
     .map((offer) => {
-      const isChecked = point.offers.find((id) => id === offer.id);
+      const isChecked = !!point.offers.find((id) => id === offer.id);
 
       return `
-              <div class="event__offer-selector">
-                <input class="event__offer-checkbox visually-hidden" id="event-offer-${offer.id
+          <div class="event__offer-selector">
+            <input class="event__offer-checkbox visually-hidden" id="event-offer-${offer.id
 }" type="checkbox" name="event-offer-${offer.title}" ${isChecked ? 'checked' : ''
 }>
-                <label class="event__offer-label" for="event-offer-${offer.id}">
-                  <span class="event__offer-title">${offer.title}</span>
-                  &plus;&euro;&nbsp;<span class="event__offer-price">${offer.price
+            <label class="event__offer-label" for="event-offer-${offer.id}">
+              <span class="event__offer-title">${offer.title}</span>
+              &plus;&euro;&nbsp;<span class="event__offer-price">${offer.price
 }</span>
-                </label>
-              </div>
-            `;
+            </label>
+          </div>
+        `;
     })
     .join('')}
-          </div>
-        </section>
-          ${point.destination
+      </div>
+    </section>
+        ` : ''}
+          ${showDestinationsContainer
     ? `
                   <section class="event__section event__section--destination">
           <h3 class="event__section-title event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${point.destination.description
+          <p class="event__destination-description">${point.destination?.description
 }</p>
-          <div class="event__photos-container">
+${isDestinationPictures ?
+    `
+<div class="event__photos-container">
             <div class="event__photos-tape">
-              ${point.destination.pictures
+              ${point.destination?.pictures
     .map(
       (picture) => `
                 <img class="event__photo" src="${picture.src}" alt="${picture.alt}">
@@ -133,6 +147,8 @@ function createEditPointTemplate(point, destinations) {
     )
     .join('')}
             </div>
+` : ''}
+
           </div>
         </section>
           `
@@ -148,12 +164,13 @@ function createEditPointTemplate(point, destinations) {
 export default class PointEditView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #handleDeleteClick = null;
+  #handleCancelClick = null;
   #datepickerFrom = null;
   #datepickerTo = null;
   #handleFormClose = null;
   #destinations = [];
 
-  constructor({ point, onFormSubmit, onDeleteClick, onFormClose }) {
+  constructor({ point, onFormSubmit, onDeleteClick, onFormClose, onCancelClick }) {
     super();
     if (point) {
       this._setState(PointEditView.parsePointToState(point));
@@ -171,6 +188,7 @@ export default class PointEditView extends AbstractStatefulView {
     }
     this.#handleFormSubmit = onFormSubmit;
     this.#handleDeleteClick = onDeleteClick;
+    this.#handleCancelClick = onCancelClick;
     this.#handleFormClose = onFormClose;
     this.#destinations = destinationsModel.destinations;
 
@@ -212,9 +230,15 @@ export default class PointEditView extends AbstractStatefulView {
     this.element
       .querySelector('#event-end-time-1')
       .addEventListener('change', this.#dateToCloseHandler);
-    this.element
-      .querySelector('.event__reset-btn')
-      .addEventListener('click', this.#formDeleteClickHandler);
+    if(this._state.id) {
+      this.element
+        .querySelector('.event__reset-btn')
+        .addEventListener('click', this.#formDeleteClickHandler);
+    } else {
+      this.element
+        .querySelector('.event__reset-btn')
+        .addEventListener('click', this.#handleCancelClick);
+    }
     this.element
       .querySelector('#event-price-1')
       .addEventListener('change', this.#formChangeBasePrice);
@@ -239,6 +263,7 @@ export default class PointEditView extends AbstractStatefulView {
 
     const newPoint = {
       ...this._state,
+      offers: [],
       type: evt.target.textContent.toLowerCase(),
     };
     this.updateElement(newPoint);
@@ -247,11 +272,8 @@ export default class PointEditView extends AbstractStatefulView {
   #formChangeBasePrice = (evt) => {
     evt.preventDefault();
 
-    const newPoint = {
-      ...this._state,
-      basePrice: evt.target.value,
-    };
-    this.updateElement(newPoint);
+    this._setState({basePrice: evt.target.value});
+    this.basePrice = evt.target.value;
   };
 
   #destinationChangeHandler = (evt) => {
@@ -270,8 +292,9 @@ export default class PointEditView extends AbstractStatefulView {
     this.updateElement(newPoint);
   };
 
-  #formSubmitHandler = (evt) => {
+  #formSubmitHandler = async (evt) => {
     evt.preventDefault();
+
     const formattedPoint = PointEditView.parseStateToPoint(this._state);
     this.#handleFormSubmit(formattedPoint);
   };

@@ -1,9 +1,12 @@
-import TotalCost from '../view/total-cost.js';
-import HeaderTitle from '../view/header-title.js';
-import TripInfo from '../view/trip-info.js';
+import TotalCostView from '../view/total-cost-view.js';
+import HeaderTitle from '../view/header-title-view.js';
+import TripInfoView from '../view/trip-info-view.js';
 
 import { UpdateType } from '../const';
 import { remove, render, RenderPosition, replace } from '../framework/render.js';
+import { sortPointByDayUp } from '../utils/helpers.js';
+
+const MAX_DESINATIONS_COUNT = 3;
 
 export default class HeaderPresenter {
   #heandlerConteiner = null;
@@ -22,13 +25,16 @@ export default class HeaderPresenter {
   }
 
   #tripTitleData(points) {
-    const destinations = points.map((point) => point.destination);
-    const destinationsCount = new Set(destinations).size;
+    const newPoints = [...points];
+    const sortedPoints = newPoints.sort(sortPointByDayUp);
+
+    const destinations = sortedPoints.map((point) => point.destination);
+    const destinationsCount = destinations.length; // Учитываем все элементы, включая дубликаты
     const firstDestination = destinations[0];
     const lastDestination = destinations[destinations.length - 1];
 
     let secondDestination = null;
-    if (destinationsCount === 3) {
+    if (destinationsCount >= MAX_DESINATIONS_COUNT) {
       secondDestination = destinations[1];
     }
 
@@ -41,12 +47,16 @@ export default class HeaderPresenter {
   }
 
   #dateFieldData(points) {
-    if(points.length) {
+    const newPoints = [...points];
+    const sortedPoints = newPoints.sort(sortPointByDayUp);
+
+    if(sortedPoints.length) {
       return {
-        firstDate: points[0].dateFrom,
-        secondDate: points[points.length - 1].dateTo
+        firstDate: sortedPoints[0].dateFrom,
+        secondDate: sortedPoints[points.length - 1].dateTo
       };
     }
+    return null;
   }
 
   #calculateTotalPrice(points) {
@@ -77,7 +87,7 @@ export default class HeaderPresenter {
 
       const previousTripInfoComponent = this.#tripInfoComponent;
 
-      const newTripInfoComponent = new TripInfo();
+      const newTripInfoComponent = new TripInfoView();
       if (previousTripInfoComponent === null) {
         render(newTripInfoComponent, this.#heandlerConteiner, RenderPosition.AFTERBEGIN);
       } else {
@@ -87,7 +97,7 @@ export default class HeaderPresenter {
 
       render(new HeaderTitle(destinations, dates), newTripInfoComponent.element);
 
-      render(new TotalCost(this.#calculateTotalPrice(points)), newTripInfoComponent.element);
+      render(new TotalCostView(this.#calculateTotalPrice(points)), newTripInfoComponent.element);
       this.#tripInfoComponent = newTripInfoComponent;
     } else {
       remove(this.#tripInfoComponent);
