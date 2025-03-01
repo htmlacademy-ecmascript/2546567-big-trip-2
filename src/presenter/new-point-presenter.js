@@ -24,10 +24,8 @@ export default class NewPointPresenter {
 
     this.#pointEditComponent = new PointEditView({
       onFormSubmit: this.#handleFormSubmit,
-      onDeleteClick: this.#handleDeleteClick,
-      onCancelClick: this.#handleCancelClick,
+      onCancelClick: this.#onCancelClick,
     });
-
     render(this.#pointEditComponent, this.#pointListContainer, RenderPosition.AFTERBEGIN);
 
     document.addEventListener('keydown', this.#escKeyDownHandler);
@@ -47,10 +45,23 @@ export default class NewPointPresenter {
   }
 
   setSaving() {
-    this.#pointEditComponent.updateElement({
-      isDisabled: true,
-      isSaving: true,
-    });
+    if(this.#pointEditComponent) {
+
+      this.#pointEditComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+
+  }
+
+  setDeleting() {
+    if(this.#pointEditComponent) {
+      this.#pointEditComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
   }
 
   setAborting() {
@@ -76,11 +87,8 @@ export default class NewPointPresenter {
     );
   };
 
-  #handleDeleteClick = () => {
+  #onCancelClick = () => {
     this.destroy();
-  };
-
-  onCancelClick = () => {
     this.#handleCancelClick();
   };
 
@@ -88,7 +96,7 @@ export default class NewPointPresenter {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
       this.destroy();
-      this.#handleCancelClick();
+      this.#onCancelClick();
     }
   };
 }

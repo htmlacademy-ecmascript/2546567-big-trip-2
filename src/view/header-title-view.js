@@ -9,14 +9,13 @@ function renderDestinations({ firstDestination, secondDestination, lastDestinati
       route = `${firstDestination}`;
       break;
     case 2:
-      route = `${firstDestination} - ${lastDestination}`;
+      route = `${firstDestination} &mdash; ${lastDestination}`;
       break;
     case 3:
-      route = `${firstDestination} - ${secondDestination} - ${lastDestination}`;
+      route = `${firstDestination} &mdash; ${secondDestination} &mdash; ${lastDestination}`;
       break;
     default:
-      // Если городов больше трех, отображаем первый и последний город с многоточием
-      route = `${firstDestination} - ... - ${lastDestination}`;
+      route = `${firstDestination} &mdash; ... &mdash; ${lastDestination}`;
       break;
   }
 
@@ -26,16 +25,15 @@ function renderDestinations({ firstDestination, secondDestination, lastDestinati
 const renderDates = (dates) => {
   if(dates) {
     const { firstDate, secondDate } = dates;
-    // Предполагаем, что firstDate и secondDate — это строки или объекты Date
     const startDate = dayjs(firstDate);
     const endDate = dayjs(secondDate);
 
-    // Форматируем даты
-    const startDay = startDate.format('D'); // День (например, 18)
-    const endDay = endDate.format('D'); // День (например, 20)
-    const month = endDate.format('MMM'); // Месяц в сокращенном формате (например, Mar)
+    const startDay = startDate.format('D');
+    const startMonth = startDate.format('MMM');
+    const endDay = endDate.format('D');
+    const endMonth = endDate.format('MMM');
 
-    return `${startDay} — ${endDay} ${month}`;
+    return `${startDay} ${startMonth} — ${endDay} ${endMonth}`;
   }
 };
 
@@ -46,7 +44,7 @@ const createTripTitleTemplate = (destinations, dates) => (
  <p class="trip-info__dates">${renderDates(dates)}</p>
  </div>`);
 
-export default class TripTitle extends AbstractView {
+export default class TripTitleView extends AbstractView {
   #destinations = null;
   #dates = null;
 
