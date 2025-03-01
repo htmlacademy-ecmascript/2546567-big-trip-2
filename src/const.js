@@ -1,8 +1,8 @@
 const FilterType = {
-  EVERYTHING:'everything',
-  PRESENT:'present',
-  PAST:'past',
-  FUTURE:'future',
+  EVERYTHING:'Everything',
+  FUTURE:'Future',
+  PRESENT:'Present',
+  PAST:'Past',
 };
 
 const SortType = {
@@ -18,6 +18,7 @@ const UpdateType = {
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
   INIT: 'INIT',
+  ERROR: 'ERROR',
 };
 
 const UserAction = {

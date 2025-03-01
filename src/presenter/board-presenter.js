@@ -2,7 +2,7 @@ import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
 import { remove, render, RenderPosition } from '../framework/render.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import { filter, sortPointByDayUp, sortPointByEventUp, sortPointByOffersUp, sortPointByPriceUp, sortPointByTimeDiffUp } from '../utils/helpers.js';
-import BoardView from '../view/board-view.js';
+import ErrorMessageView from '../view/error-message-view.js';
 import LoadingView from '../view/loading-view.js';
 import NoPointView from '../view/no-point.view.js';
 import PointListView from '../view/points-list-view.js';
@@ -10,7 +10,7 @@ import SortView from '../view/sort-view.js';
 import NewPointPresenter from './new-point-presenter.js';
 import PointPresenter from './point-presenter.js';
 
-const POINT_COUNT_PER_STEP = 8;
+const POINT_COUNT_PER_STEP = 30;
 const TimeLimit = {
   LOWER_LIMIT: 350,
   UPPER_LIMIT: 1000,
@@ -21,9 +21,9 @@ class BoardPresenter {
   #pointsModel = null;
   #filterModel = null;
 
-  #boardComponent = new BoardView();
   #pointListComponent = new PointListView();
   #loadingComponent = new LoadingView();
+  #errorMessageComponent = new ErrorMessageView();
   #noPointComponent = null;
   #sortComponent = null;
 
@@ -33,6 +33,7 @@ class BoardPresenter {
   #currentSortType = SortType.DAY;
   #filterType = FilterType.EVERYTHING;
   #isLoading = true;
+  #isError = false;
   #uiBlocker = new UiBlocker({
     lowerLimit: TimeLimit.LOWER_LIMIT,
     upperLimit: TimeLimit.UPPER_LIMIT
@@ -47,6 +48,7 @@ class BoardPresenter {
       pointListContainer: this.#pointListComponent.element,
       onDataChange: this.#handleViewAction,
       onDestroy: onNewPointDestroy,
+      onCancel: this.#onCancelBtnClick.bind(this),
     });
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
@@ -83,13 +85,36 @@ class BoardPresenter {
     this.#currentSortType = SortType.DEFAULT;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
     this.#newPointPresenter.init();
+
+    if (this.#noPointComponent && !this.#pointsModel.points.length) {
+      remove(this.#noPointComponent);
+    }
+  }
+
+  #onCancelBtnClick() {
+    if (this.#pointsModel.points.length === 0) {
+      this.#noPointComponent = new NoPointView({
+        filterType: this.#filterType
+      });
+
+      render(this.#noPointComponent, this.#boardContainer, RenderPosition.AFTEREND);
+    }
   }
 
   #handleModelEvent = (updateType, data) => {
+    this.#isError = false;
     switch (updateType) {
+      case UpdateType.ERROR:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#isError = true;
+        this.#clearBoard();
+        this.#renderBoard();
+        break;
       case UpdateType.PATCH:
-
         this.#pointPresenters.get(data.id).init(data);
+        this.#clearBoard();
+        this.#renderBoard();
         break;
       case UpdateType.MINOR:
         this.#clearBoard();
@@ -132,12 +157,21 @@ class BoardPresenter {
         this.#newPointPresenter.setSaving();
         try {
           await this.#pointsModel.addPoint(updateType, update);
+          this.#isLoading = false;
+          remove(this.#loadingComponent);
         } catch(err) {
           this.#newPointPresenter.setAborting();
         }
         break;
       case UserAction.DELETE_POINT:
-        this.#pointsModel.points = this.#pointsModel.points.filter((item) => item.id !== update.id);
+        this.#pointPresenters.get(update.id).setDeleting();
+        try {
+          await this.#pointsModel.deletePoint(updateType, update);
+          this.#isLoading = false;
+          remove(this.#loadingComponent);
+        } catch(err) {
+          this.#pointPresenters.get(update.id).setAborting();
+        }
         break;
     }
 
@@ -159,7 +193,11 @@ class BoardPresenter {
   }
 
   #renderLoading() {
-    render(this.#loadingComponent, this.#boardComponent.element, RenderPosition.AFTERBEGIN);
+    render(this.#loadingComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
+  }
+
+  #renderErrorMessage() {
+    render(this.#errorMessageComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
   }
 
   #renderNoPoints() {
@@ -167,7 +205,7 @@ class BoardPresenter {
       filterType: this.#filterType
     });
 
-    render(this.#noPointComponent, this.#boardComponent.element, RenderPosition.AFTERBEGIN);
+    render(this.#noPointComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
   }
 
   #handleSortTypeChange = (sortType) => {
@@ -186,7 +224,7 @@ class BoardPresenter {
       onSortTypeChange: this.#handleSortTypeChange
     });
 
-    render(this.#sortComponent, this.#boardComponent.element, RenderPosition.AFTERBEGIN);
+    render(this.#sortComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
   }
 
   #clearBoard({resetRenderedPointCount = false, resetSortType = false} = {}) {
@@ -196,6 +234,7 @@ class BoardPresenter {
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
 
+    // remove(this.#boardComponent);
     remove(this.#sortComponent);
     remove(this.#loadingComponent);
 
@@ -215,10 +254,16 @@ class BoardPresenter {
   }
 
   #renderBoard() {
-    render(this.#boardComponent, this.#boardContainer);
+    // Очищаем содержимое контейнера перед рендером
+    this.#boardContainer.innerHTML = '';
 
     if (this.#isLoading) {
       this.#renderLoading();
+      return;
+    }
+
+    if (this.#isError) {
+      this.#renderErrorMessage();
       return;
     }
 
@@ -227,11 +272,10 @@ class BoardPresenter {
 
     if (pointCount === 0) {
       this.#renderNoPoints();
-      return;
     }
 
     this.#renderSort();
-    render(this.#pointListComponent, this.#boardComponent.element);
+    render(this.#pointListComponent, this.#boardContainer);
 
     this.#renderPoints(points.slice(0, Math.min(pointCount, this.#renderedPointCount)));
   }
