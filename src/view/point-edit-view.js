@@ -92,7 +92,7 @@ function createEditPointTemplate(point, destinations) {
         </div>
 
         <button class="event__save-btn btn btn--blue" type="submit" ${point.isSaving || point.isDisabled ? 'disabled' : ''}>${saveBtnText}</button>
-        <button class="event__reset-btn btn" type="reset" ${point.isSaving || point.isDisabled ? 'disabled' : ''} >${idEditing ? deleteBtnText : 'Cancel'
+        <button class="event__reset-btn btn" type="reset" ${point.isSaving && idEditing || point.isDisabled && idEditing ? 'disabled' : ''} >${idEditing ? deleteBtnText : 'Cancel'
 }</button>
         ${idEditing
     ? `<button class="event__rollup-btn" type="button">
@@ -230,6 +230,7 @@ export default class PointEditView extends AbstractStatefulView {
     this.element
       .querySelector('#event-end-time-1')
       .addEventListener('change', this.#dateToCloseHandler);
+
     if(this._state.id) {
       this.element
         .querySelector('.event__reset-btn')
@@ -239,6 +240,7 @@ export default class PointEditView extends AbstractStatefulView {
         .querySelector('.event__reset-btn')
         .addEventListener('click', this.#handleCancelClick);
     }
+
     this.element
       .querySelector('#event-price-1')
       .addEventListener('change', this.#formChangeBasePrice);
@@ -294,6 +296,7 @@ export default class PointEditView extends AbstractStatefulView {
 
   #formSubmitHandler = async (evt) => {
     evt.preventDefault();
+
 
     const formattedPoint = PointEditView.parseStateToPoint(this._state);
     this.#handleFormSubmit(formattedPoint);

@@ -154,7 +154,7 @@ class BoardPresenter {
         }
         break;
       case UserAction.ADD_POINT:
-        // this.#newPointPresenter.setSaving();
+        this.#newPointPresenter.setSaving();
         try {
           await this.#pointsModel.addPoint(updateType, update);
           this.#isLoading = false;
