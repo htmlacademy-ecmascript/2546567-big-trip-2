@@ -1,7 +1,12 @@
 import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
 import { remove, render, RenderPosition } from '../framework/render.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
-import { filter, sortPointByDayUp, sortPointByEventUp, sortPointByOffersUp, sortPointByPriceUp, sortPointByTimeDiffUp } from '../utils/helpers.js';
+import {
+  filter,
+  sortPointByDayUp,
+  sortPointByPriceUp,
+  sortPointByTimeDiffUp,
+} from '../utils/helpers.js';
 import ErrorMessageView from '../view/error-message-view.js';
 import LoadingView from '../view/loading-view.js';
 import NoPointView from '../view/no-point.view.js';
@@ -36,10 +41,10 @@ class BoardPresenter {
   #isError = false;
   #uiBlocker = new UiBlocker({
     lowerLimit: TimeLimit.LOWER_LIMIT,
-    upperLimit: TimeLimit.UPPER_LIMIT
+    upperLimit: TimeLimit.UPPER_LIMIT,
   });
 
-  constructor({boardContainer, pointsModel, filterModel, onNewPointDestroy}) {
+  constructor({ boardContainer, pointsModel, filterModel, onNewPointDestroy }) {
     this.#boardContainer = boardContainer;
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
@@ -64,17 +69,13 @@ class BoardPresenter {
     switch (this.#currentSortType) {
       case SortType.DAY:
         return filteredPoints.sort(sortPointByDayUp);
-      case SortType.EVENT:
-        return filteredPoints.sort(sortPointByEventUp);
       case SortType.TIME:
         return filteredPoints.sort(sortPointByTimeDiffUp);
       case SortType.PRICE:
         return filteredPoints.sort(sortPointByPriceUp);
-      case SortType.OFFER:
-        return filteredPoints.sort(sortPointByOffersUp);
+      default:
+        return filteredPoints.sort(sortPointByDayUp);
     }
-
-    return filteredPoints;
   }
 
   init() {
@@ -94,10 +95,14 @@ class BoardPresenter {
   #onCancelBtnClick() {
     if (this.#pointsModel.points.length === 0) {
       this.#noPointComponent = new NoPointView({
-        filterType: this.#filterType
+        filterType: this.#filterType,
       });
 
-      render(this.#noPointComponent, this.#boardContainer, RenderPosition.AFTEREND);
+      render(
+        this.#noPointComponent,
+        this.#boardContainer,
+        RenderPosition.AFTEREND
+      );
     }
   }
 
@@ -121,7 +126,10 @@ class BoardPresenter {
         this.#renderBoard();
         break;
       case UpdateType.MAJOR:
-        this.#clearBoard({resetRenderedPointCount: true, resetSortType: true});
+        this.#clearBoard({
+          resetRenderedPointCount: true,
+          resetSortType: true,
+        });
         this.#renderBoard();
         break;
       case UpdateType.INIT:
@@ -138,7 +146,6 @@ class BoardPresenter {
   };
 
   #handleViewAction = async (actionType, updateType, update) => {
-
     this.#uiBlocker.block();
 
     switch (actionType) {
@@ -148,8 +155,7 @@ class BoardPresenter {
           await this.#pointsModel.updatePoint(updateType, update);
           this.#isLoading = false;
           remove(this.#loadingComponent);
-
-        } catch(err) {
+        } catch (err) {
           this.#pointPresenters.get(update.id).setAborting();
         }
         break;
@@ -159,7 +165,7 @@ class BoardPresenter {
           await this.#pointsModel.addPoint(updateType, update);
           this.#isLoading = false;
           remove(this.#loadingComponent);
-        } catch(err) {
+        } catch (err) {
           this.#newPointPresenter.setAborting();
         }
         break;
@@ -169,7 +175,7 @@ class BoardPresenter {
           await this.#pointsModel.deletePoint(updateType, update);
           this.#isLoading = false;
           remove(this.#loadingComponent);
-        } catch(err) {
+        } catch (err) {
           this.#pointPresenters.get(update.id).setAborting();
         }
         break;
@@ -193,19 +199,31 @@ class BoardPresenter {
   }
 
   #renderLoading() {
-    render(this.#loadingComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
+    render(
+      this.#loadingComponent,
+      this.#boardContainer,
+      RenderPosition.AFTERBEGIN
+    );
   }
 
   #renderErrorMessage() {
-    render(this.#errorMessageComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
+    render(
+      this.#errorMessageComponent,
+      this.#boardContainer,
+      RenderPosition.AFTERBEGIN
+    );
   }
 
   #renderNoPoints() {
     this.#noPointComponent = new NoPointView({
-      filterType: this.#filterType
+      filterType: this.#filterType,
     });
 
-    render(this.#noPointComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
+    render(
+      this.#noPointComponent,
+      this.#boardContainer,
+      RenderPosition.AFTERBEGIN
+    );
   }
 
   #handleSortTypeChange = (sortType) => {
@@ -214,27 +232,30 @@ class BoardPresenter {
     }
 
     this.#currentSortType = sortType;
-    this.#clearBoard({resetRenderedPointCount: true});
+    this.#clearBoard({ resetRenderedPointCount: true });
     this.#renderBoard();
   };
 
   #renderSort() {
     this.#sortComponent = new SortView({
       currentSortType: this.#currentSortType,
-      onSortTypeChange: this.#handleSortTypeChange
+      onSortTypeChange: this.#handleSortTypeChange,
     });
 
-    render(this.#sortComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
+    render(
+      this.#sortComponent,
+      this.#boardContainer,
+      RenderPosition.AFTERBEGIN
+    );
   }
 
-  #clearBoard({resetRenderedPointCount = false, resetSortType = false} = {}) {
+  #clearBoard({ resetRenderedPointCount = false, resetSortType = false } = {}) {
     const pointCount = this.points.length;
 
     this.#newPointPresenter.destroy();
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
 
-    // remove(this.#boardComponent);
     remove(this.#sortComponent);
     remove(this.#loadingComponent);
 
@@ -277,7 +298,9 @@ class BoardPresenter {
     this.#renderSort();
     render(this.#pointListComponent, this.#boardContainer);
 
-    this.#renderPoints(points.slice(0, Math.min(pointCount, this.#renderedPointCount)));
+    this.#renderPoints(
+      points.slice(0, Math.min(pointCount, this.#renderedPointCount))
+    );
   }
 }
 export { BoardPresenter };
