@@ -19,7 +19,6 @@ export default class FilterPresenter {
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
-  //TODO тут нужно настроить фильтры !!!
   get filters() {
     const points = this.#pointsModel.points;
 
@@ -29,31 +28,27 @@ export default class FilterPresenter {
 
       switch (type) {
         case FilterType.PRESENT:
-          // Фильтруем точки, которые происходят сейчас (dateFrom <= сейчас <= dateTo)
           filteredPoints = points.filter((point) =>
-            dayjs(point.dateFrom).isBefore(dayjs(), 'day') && dayjs(point.dateTo).isAfter(dayjs(), 'day')
+            (dayjs(point.dateFrom).isBefore(dayjs(), 'day') || dayjs(point.dateFrom).isSame(dayjs(), 'day')) &&
+            (dayjs(point.dateTo).isAfter(dayjs(), 'day') || dayjs(point.dateTo).isSame(dayjs(), 'day'))
           );
           break;
         case FilterType.PAST:
-          // Фильтруем точки, которые уже прошли (dateTo < сейчас)
           filteredPoints = points.filter((point) =>
             dayjs(point.dateTo).isBefore(dayjs(), 'day')
           );
           break;
         case FilterType.FUTURE:
-          // Фильтруем точки, которые в будущем (dateFrom > сейчас)
           filteredPoints = points.filter((point) =>
             dayjs(point.dateFrom).isAfter(dayjs(), 'day')
           );
           break;
         case FilterType.EVERYTHING:
         default:
-          // Возвращаем все точки без изменений
           filteredPoints = points;
           break;
       }
 
-      // Возвращаем объект с типом фильтра и количеством отфильтрованных точек
       return {
         type,
         count: filteredPoints.length,

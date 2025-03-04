@@ -1,9 +1,14 @@
 import dayjs from 'dayjs';
 import { FilterType } from '../const';
 
+export const isEscapeKey = (evt) => evt.key === 'Escape';
+
 const filter = {
   [FilterType.EVERYTHING] : (points) => points.filter((point) => point),
-  [FilterType.PRESENT] : (points) => points.filter((point) => dayjs(point.dateFrom).isBefore(dayjs(), 'day') && dayjs(point.dateTo).isAfter(dayjs(), 'day')),
+  [FilterType.PRESENT]: (points) => points.filter((point) =>
+    (dayjs(point.dateFrom).isBefore(dayjs(), 'day') || dayjs(point.dateFrom).isSame(dayjs(), 'day')) &&
+    (dayjs(point.dateTo).isAfter(dayjs(), 'day') || dayjs(point.dateTo).isSame(dayjs(), 'day'))
+  ),
   [FilterType.PAST] : (points) => points.filter((point) => dayjs(point.dateTo).isBefore(dayjs(), 'day')),
   [FilterType.FUTURE] : (points) => points.filter((point) => dayjs(point.dateFrom).isAfter(dayjs(), 'day')),
 };
@@ -14,8 +19,6 @@ function humanizePointDueDate(dueDate) {
   return dueDate ? dayjs(dueDate).format(DATE_FORMAT) : '';
 }
 
-// Функция помещает задачи без даты в конце списка,
-// возвращая нужный вес для колбэка sort
 function getWeightForNullDate(dateA, dateB) {
   if (dateA === null && dateB === null) {
     return 0;
@@ -53,12 +56,12 @@ function sortPointByEventUp(pointA, pointB) {
 
 function sortPointByTimeDiffUp(pointA, pointB) {
   if (!pointA.dateTo || !pointA.dateFrom || !pointB.dateTo || !pointB.dateFrom) {
-    return 0; // Если даты отсутствуют, считаем точки равными
+    return 0;
   }
 
   const durationA = dayjs(pointA.dateTo).diff(dayjs(pointA.dateFrom));
   const durationB = dayjs(pointB.dateTo).diff(dayjs(pointB.dateFrom));
-  return durationB - durationA; // От самой долгой до самой короткой
+  return durationB - durationA;
 }
 
 function sortPointByOffersUp(pointA, pointB) {
