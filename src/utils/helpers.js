@@ -13,12 +13,6 @@ const filter = {
   [FilterType.FUTURE] : (points) => points.filter((point) => dayjs(point.dateFrom).isAfter(dayjs(), 'day')),
 };
 
-const DATE_FORMAT = 'D MMMM';
-
-function humanizePointDueDate(dueDate) {
-  return dueDate ? dayjs(dueDate).format(DATE_FORMAT) : '';
-}
-
 function getWeightForNullDate(dateA, dateB) {
   if (dateA === null && dateB === null) {
     return 0;
@@ -44,16 +38,6 @@ function sortPointByPriceUp(pointA, pointB) {
   return pointB.basePrice - pointA.basePrice;
 }
 
-function sortPointByEventUp(pointA, pointB) {
-  if (pointA.destination.name.toLowerCase() < pointB.destination.name.toLowerCase()) {
-    return -1;
-  }
-  if (pointA.destination.name.toLowerCase() > pointB.destination.name.toLowerCase()) {
-    return 1;
-  }
-  return 0;
-}
-
 function sortPointByTimeDiffUp(pointA, pointB) {
   if (!pointA.dateTo || !pointA.dateFrom || !pointB.dateTo || !pointB.dateFrom) {
     return 0;
@@ -64,9 +48,4 @@ function sortPointByTimeDiffUp(pointA, pointB) {
   return durationB - durationA;
 }
 
-function sortPointByOffersUp(pointA, pointB) {
-  return pointB.offers.length - pointA.offers.length;
-}
-
-
-export {filter, humanizePointDueDate, sortPointByDayUp, sortPointByPriceUp, sortPointByEventUp, sortPointByTimeDiffUp, sortPointByOffersUp};
+export {filter, sortPointByDayUp, sortPointByPriceUp, sortPointByTimeDiffUp};
