@@ -10,7 +10,7 @@ import {
 import ErrorMessageView from '../view/error-message-view.js';
 import LoadingView from '../view/loading-view.js';
 import NoPointView from '../view/no-point.view.js';
-import PointListView from '../view/points-list-view.js';
+import PointListView from '../view/point-list-view.js';
 import SortView from '../view/sort-view.js';
 import NewPointPresenter from './new-point-presenter.js';
 import PointPresenter from './point-presenter.js';
@@ -275,7 +275,6 @@ class BoardPresenter {
   }
 
   #renderBoard() {
-    // Очищаем содержимое контейнера перед рендером
     this.#boardContainer.innerHTML = '';
 
     if (this.#isLoading) {
@@ -284,6 +283,7 @@ class BoardPresenter {
     }
 
     if (this.#isError) {
+      document.querySelector('.trip-main__event-add-btn').disabled = true;
       this.#renderErrorMessage();
       return;
     }
@@ -303,4 +303,4 @@ class BoardPresenter {
     );
   }
 }
-export { BoardPresenter };
+export default BoardPresenter;

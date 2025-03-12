@@ -1,12 +1,12 @@
 import FilterPresenter from './presenter/filter-presenter.js';
-import FilterModel from './model/FilterModel.js';
+import FilterModel from './model/filter-model.js';
 import PointsApiService from './points-api-service.js';
-import PointsModel from './model/PointsModel.js';
-import { BoardPresenter } from './presenter/board-presenter.js';
+import PointsModel from './model/points-model.js';
+import BoardPresenter from './presenter/board-presenter.js';
 import NewPointButtonView from './view/new_point_button_view.js';
 import { render } from './framework/render.js';
-import DestinationsModel from './model/destinationsModel.js';
-import OffersModel from './model/OffersModel.js';
+import DestinationsModel from './model/destinations-model.js';
+import OffersModel from './model/offers-model.js';
 import HeaderPresenter from './presenter/header-presenter.js';
 
 const AUTHORIZATION = 'Basic hS5syS74pcl1la7j';
